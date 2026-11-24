@@ -6,7 +6,11 @@ This folder captures product and implementation context for the RHL career simul
 - [Season 10 scoring baseline](./season-10-baseline.md) records the calculations and limitations from the supplied stats dataset.
 
 The first playable version drafts three random players, lets the user choose a default
-team to replace (or assigns one randomly), fills lineup gaps from the remaining player
-pool, and simulates seven weeks of regional round-robin play followed by a
-best-of-seven championship final. The full qualification and playoff format remains
-future work; see [outstanding context](./outstanding.md).
+team to replace (or assigns one randomly), and fills lineup gaps from the remaining
+player pool. It starts at League Play because qualifier entrants and rosters are not
+provided, then follows the documented League Play, regional playoff, LCQ,
+international group, and championship-bracket formats. Each week's or round's game
+scores remain visible until the user continues. During bracket stages, match cards
+identify their round and a live bracket is displayed above the matches with separate
+upper/lower lanes and advancement routes. The remaining implementation gaps are listed
+in [outstanding context](./outstanding.md).

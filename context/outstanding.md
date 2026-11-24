@@ -1,6 +1,6 @@
 # Outstanding Context for a Playable RHL Season
 
-This document lists the context and implementation data still needed to turn the RHL Season 10 format, player ratings, and match simulator into a complete playable season.
+This document tracks remaining context and implementation work for the RHL Season 10 simulator.
 
 The core format is documented in [rhl-season-10-format.md](./rhl-season-10-format.md). The match model is documented in [match-simulator.md](./match-simulator.md). The player-rating data is documented in [season-10-baseline.md](./season-10-baseline.md).
 
@@ -8,27 +8,17 @@ The core format is documented in [rhl-season-10-format.md](./rhl-season-10-forma
 
 ### League and team rosters
 
-The simulator needs:
+The playable version loads the 16 League Play teams and player affiliations from
+`data/player_ratings_assigned.csv`. The supplied data supports eight teams per region
+with at least three players per team. The career draft replaces one selected or random
+team's lineup; other teams use their top three available players, with vacancies filled
+from the remaining pool.
 
-- 16 League Play team definitions.
-- 8 NA teams.
-- 8 EU/MENA teams.
-- Team names.
-- Team regions.
+Still missing from the source data:
+
 - Team captains.
-- Three or four rostered players per team.
 - Anchor-player assignments.
-- Starting three-player lineups.
-- Free-agent players and eligibility.
-
-The current `data/player_ratings.csv` contains rated players but does not contain:
-
-- Team affiliations.
-- Team names.
-- Regions.
-- Captains.
-- Anchor status.
-- Qualifier teams.
+- Qualifier teams and their rosters.
 - Substitute assignments.
 
 ### Qualifier and qualification results
@@ -41,17 +31,16 @@ The simulator needs:
 - Advancement results for all qualifier brackets.
 - Anchor players selected after each qualifying event.
 
-Because actual Season 10 qualifier and team results are not available in the project context, a generated-season mode will need to create 16 League Play teams from the available player pool.
+Qualifier entrants and qualification results are not provided. The playable season
+therefore starts at League Play with the 16 supplied teams; it does not invent
+qualifier entrants or results.
 
 ### Seeding and matchup assignments
 
-The season engine can derive League Play pairings directly, but it needs a decision or deterministic process for:
-
-- Regional playoff seeding: use a normal 1-vs-4 and 2-vs-3 upper-semifinal bracket.
-- International group placement: the handbook does not specify the draw/seeding process.
-- A reproducible international group draw that produces 2 NA and 2 EU/MENA teams in each group.
-
-For a generated season, random or seed-based group drawing is acceptable unless actual Season 10 group assignments are supplied later.
+The playable version uses the documented 1-vs-4 and 2-vs-3 regional semifinals and
+randomly draws balanced international groups with two teams from each region. The
+handbook does not specify historical international group assignments; the draw is not
+seeded yet.
 
 ### Roster and substitution rules
 
@@ -72,7 +61,7 @@ For a minimum first season model, substitutions and transactions can remain stat
 
 ## Season engine state
 
-A complete season engine needs persistent state for:
+The in-memory season object currently tracks:
 
 - League Play series wins.
 - League Play series losses.
@@ -80,25 +69,20 @@ A complete season engine needs persistent state for:
 - Individual games lost.
 - Game differential.
 - Head-to-head results.
-- Tiebreaker state.
-- Current bracket.
-- Eliminated teams.
-- Qualified teams.
-- LCQ teams and winners.
-- International group placement.
-- International advancement.
+- Qualification tiebreaker wins.
+- Current stage and bracket round.
+- Regional playoff seeds and results.
+- LCQ entrants and qualifiers.
+- International group placement and results.
 - Roster membership.
-- Remaining Roster Transactions.
 - Match history.
-- Player season totals.
-- Random simulation seed or seed history.
-- Reproducibility settings for testing.
 
-For a simple season, this state can be represented by a season object containing region standings, bracket state, match results, and team rosters.
+Still outstanding are durable save/load, player season totals, and a persisted random
+seed or seed history.
 
 ## League Play requirements
 
-The season engine should implement:
+The playable engine implements:
 
 - 8 teams per region.
 - One match between every team in the same region.
@@ -119,9 +103,9 @@ At the end of League Play:
 | 5th-6th | Regional Last Chance Qualifier |
 | 7th-8th | Eliminated |
 
-## Match simulation gaps
+## Match simulation status
 
-The existing match concept already covers:
+The game currently implements:
 
 - 3v3 team selection.
 - Team-attribute aggregation.
@@ -129,12 +113,11 @@ The existing match concept already covers:
 - Attack, playmaking, and opposing defence adjustments.
 - Per-team form randomness.
 - Poisson-distributed goal counts.
-- Scorer and assister selection.
 - Sudden-death overtime.
-- Seedable random tests.
 
-The following data or behavior is still missing:
+Still missing from the match simulator:
 
+- Goal-event times and scorer/assister assignment.
 - Save generation.
 - A calibrated score-distribution model.
 - Calibrated overtime frequency.
@@ -149,21 +132,15 @@ The following data or behavior is still missing:
 - Goal-event persistence across a season.
 - Defensive saves tied to actual goals conceded.
 - Match-level data for validating the player-rating model.
+- Seedable randomness for repeatable test cases.
 
 The current saves model should remain an optional later extension. Saves-per-game is a weak defence proxy and should not be converted directly into prevented goals.
 
 ## Match result data
 
-At minimum, the match engine should return:
+The game records each series winner, its individual game scores, overtime flags,
+round, and bracket advancement. Future match-simulation work could add:
 
-- Team A.
-- Team B.
-- Regulation score.
-- Overtime result.
-- Final score.
-- Winner.
-- Series result.
-- Individual-game result.
 - Goal events.
 - Goal times.
 - Scorer.
@@ -171,15 +148,6 @@ At minimum, the match engine should return:
 - Player goals.
 - Player assists.
 - Optional player saves.
-
-For season mode, it should additionally record:
-
-- Match stage.
-- Bracket round.
-- BO5 or BO7 format.
-- Regional or international stage.
-- Series wins after the match.
-- Current seed or bracket position.
 
 ## Match format implementation
 
@@ -359,47 +327,29 @@ For international matches:
 - In the International Upper Bracket Final, the team with the better overall record has server priority.
 - If overall records are equal, NA gets server priority.
 
-## Recommended minimum playable version
+## Current playable scope and remaining work
 
-Use the following first implementation:
+The browser game currently:
 
-1. Generate 16 teams from the 56 Season 10 rated players.
-2. Give each team exactly three starting players.
-3. Optionally add a fourth substitute player to roster data.
-4. Create 8 NA teams and 8 EU/MENA teams.
-5. Play the League Play single round-robin.
-6. Track series wins and individual-game differential.
-7. Rank teams using the standing rules.
-8. Play both regional playoff brackets.
-9. Play both regional LCQs.
-10. Send 4 teams per region to the International stage.
-11. Draw 2 balanced international groups.
-12. Play all international group matches.
-13. Play the 6-team Championship bracket.
-14. Display the international champion.
-15. Store match history and player season totals.
+- Drafts three players and replaces one chosen or random default-team lineup.
+- Runs the five-week regional League Play round robin, with two matches per team in
+  Weeks 4 and 5.
+- Advances the top four from each region through the documented regional
+  double-elimination bracket and the 4-team LCQ.
+- Draws two international groups with two teams from each region, then runs the
+  documented group and 6-team championship brackets.
+- Pauses after each simulated week or tournament round so the user can review every
+  series score and individual game score before continuing.
 
-## Season-wide UI state
+It does not simulate the placement qualifiers because their team entries and player
+rosters are absent. It also keeps rosters static and does not yet save seasons,
+generate player-level match statistics, or model servers and substitutions.
 
-A playable UI will need views for:
+## Remaining UI enhancements
 
-- Team and roster selection.
-- League standings.
-- Regional standings.
-- Schedule.
-- Match setup.
-- Simulated individual game.
-- BO5/BO7 series progress.
-- Bracket progression.
-- Regional playoff bracket.
-- LCQ bracket.
-- International groups.
-- Championship bracket.
-- Match history.
-- Player statistics.
-- Season champion.
-- Replay or match-log controls.
-- Optional random seed controls.
+The current UI shows team setup, regional League Play standings, each active round's
+series and game scores, past match results, and the champion. Future UI work could add
+visual bracket trees, player statistics, replay controls, and an optional seed setting.
 
 ## Recommended season data model
 
