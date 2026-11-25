@@ -22,7 +22,7 @@
 
     * { box-sizing: border-box; }
     body { margin: 0; min-width: 320px; }
-    button, select { font: inherit; }
+    button, input, select { font: inherit; }
     button {
       border: 0;
       border-radius: 8px;
@@ -40,7 +40,7 @@
       color: #e5e7eb;
     }
     button.secondary:hover:not(:disabled) { background: #263448; }
-    select {
+    input, select {
       width: 100%;
       max-width: 420px;
       border: 1px solid var(--line);
@@ -49,6 +49,7 @@
       background: #111827;
       color: #f3f4f6;
     }
+    input::placeholder { color: var(--muted); opacity: .55; }
     .shell { max-width: 1080px; margin: 0 auto; padding: 30px 20px 56px; }
     .topline {
       display: flex;
@@ -84,9 +85,20 @@
     }
     .player-card { min-height: 126px; }
     .player-card strong { display: block; margin: 12px 0 8px; font-size: 18px; }
+    .player-card button { margin-top: 12px; }
+    .draft-section-label { grid-column: 1 / -1; margin: 8px 0 0; color: var(--accent); }
     .rating { color: var(--gold); font-weight: 750; }
     .eyebrow { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
-    .setup-controls { display: grid; gap: 16px; max-width: 500px; }
+    .setup-controls {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: grid;
+      gap: 16px;
+      max-width: 500px;
+      padding: 12px 0;
+      background: var(--panel);
+    }
     .setup-controls label { display: grid; gap: 7px; font-size: 13px; font-weight: 700; }
     .button-row { display: flex; flex-wrap: wrap; gap: 9px; }
     .notice { min-height: 22px; margin: 12px 0 0; color: var(--muted); font-size: 13px; }
@@ -109,6 +121,13 @@
       text-transform: uppercase;
     }
     .match-list { display: grid; gap: 9px; }
+    #week-matches.bracket-current-match {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 8px 0;
+      background: var(--panel);
+    }
     .match-card { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
     .match-label { grid-column: 1 / -1; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
     .match-team:last-child { text-align: right; }
@@ -183,25 +202,29 @@
   <main class="shell">
     <div class="topline"><span class="topline-mark">◈</span> Rocket Hockey League · Career</div>
     <h1>Make a run.</h1>
-    <p class="intro">Get three players, take over a team, and play RHL Season 10 from League Play to the International Championship.</p>
+    <p class="intro">Pick three players from randomly drawn teams, take over a team, and play RHL Season 10 from League Play to the International Championship.</p>
 
     <section id="setup-screen" class="panel" aria-labelledby="setup-title">
-      <h2 id="setup-title">Build your squad</h2>
-      <p>Draw three players at random. Choose a default team to replace, or leave the team choice on random to take over a team from either region. Season play starts at League Play because qualifier rosters are not included.</p>
-      <div id="draft-players" class="player-grid" aria-live="polite"></div>
-      <p id="team-assignment" class="notice" hidden></p>
+      <h2 id="setup-title">Pick your squad</h2>
+      <p>Draw a random team, choose one of its players, and repeat until you have three. Name your team or leave it as “Your Team,” then choose a default team to replace or let the game choose one at random. Season play starts at League Play because qualifier rosters are not included.</p>
       <div class="setup-controls">
+        <label for="team-name">
+          Your team name
+          <input id="team-name" type="text" maxlength="40" placeholder="Your Team" autocomplete="off">
+        </label>
         <label for="team-select">
-          Team to take over <span style="color: var(--muted); font-weight: 400">(optional)</span>
+          Team to replace
           <select id="team-select" disabled>
             <option value="">Random team (NA or EU/MENA)</option>
           </select>
         </label>
         <div class="button-row">
-          <button id="draft-button" type="button" disabled>Draw your three players</button>
+          <button id="draft-button" type="button" disabled>Draw a random team</button>
         </div>
         <button id="start-button" type="button" disabled>Start the season</button>
       </div>
+      <p id="team-assignment" class="notice" hidden></p>
+      <div id="draft-players" class="player-grid" aria-live="polite"></div>
       <p id="status" class="notice" role="status">Loading the Season 10 player pool…</p>
     </section>
 
@@ -222,12 +245,12 @@
           </div>
           <button id="advance-button" type="button">Simulate week 1</button>
         </div>
+        <div id="week-matches" class="match-list"></div>
         <section id="bracket-panel" class="panel bracket-panel" aria-labelledby="bracket-title" hidden>
           <h2 id="bracket-title">Tournament bracket</h2>
           <p id="bracket-note" class="bracket-note"></p>
           <div id="bracket-content"></div>
         </section>
-        <div id="week-matches" class="match-list"></div>
       </div>
       <div class="columns">
         <section class="panel" aria-labelledby="standings-title">

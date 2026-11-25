@@ -28,15 +28,9 @@ function average(players, attribute) {
 }
 
 function goalsExpected(team, opponent) {
-  const attack = average(team.players, "attack");
-  const playmaking = average(team.players, "playmaking");
-  const opponentDefence = average(opponent.players, "defence");
-
-  return BASE_GOALS * Math.exp(
-    0.012 * (attack - 75) +
-    0.006 * (playmaking - 75) -
-    0.008 * (opponentDefence - 75)
-  );
+  const ratingDifference =
+    average(team.players, "rating") - average(opponent.players, "rating");
+  return BASE_GOALS * Math.exp(0.01 * ratingDifference);
 }
 
 function poisson(lambda, random) {
@@ -152,6 +146,7 @@ export function getDefaultTeams(players) {
 
 export function createCareerSetup(players, {
   teamId: selectedTeamId = null,
+  teamName = "Your Team",
   draft: existingDraft = null,
   random = Math.random
 } = {}) {
@@ -175,6 +170,7 @@ export function createCareerSetup(players, {
   if (!userTeam) {
     throw new Error("Choose one of the 16 default teams or use the random team option.");
   }
+  userTeam.name = String(teamName ?? "").trim() || "Your Team";
   const draftedNames = new Set(draft.map((player) => player.name));
   const assignedNames = new Set(draftedNames);
 
@@ -908,6 +904,28 @@ export function continueSeason(season, random = Math.random) {
     advanceFromInternationalChampionship(season);
   }
   return season.stage;
+}
+
+export function advanceToNextUserMatch(season, random = Math.random) {
+  let round = getCurrentRound(season);
+  let skippedRounds = 0;
+
+  while (
+    round &&
+    !round.matches.some((match) =>
+      match.teamAId === season.userTeamId || match.teamBId === season.userTeamId
+    )
+  ) {
+    if (skippedRounds >= 100) {
+      throw new Error("Could not find the next match for your team.");
+    }
+    simulateCurrentStep(season, random);
+    continueSeason(season, random);
+    skippedRounds += 1;
+    round = getCurrentRound(season);
+  }
+
+  return { round, skippedRounds };
 }
 
 export function getStageLabel(season) {

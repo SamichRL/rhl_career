@@ -25,6 +25,6 @@ The team estimate assumes the three players' scoring contributions add up over t
 - **Playmaking:** APG
 - **Defence:** saves per game
 
-The combined player rating weights attack 50%, playmaking 20%, and defence 30%. The match simulator should use the three underlying attributes rather than treating the combined rating as a separate gameplay skill.
+The combined player rating weights attack 50%, playmaking 20%, and defence 30%.
 
 Saves per game is only a proxy for defending: players on teams under more pressure may record more saves. Treat it as a weak signal until match-level data can validate its relationship to goals conceded.

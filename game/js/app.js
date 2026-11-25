@@ -1,6 +1,7 @@
 import { csvRowsToObjects } from "./csv.js";
 import { normalizePlayer, validatePlayer } from "./player.js";
 import {
+  advanceToNextUserMatch,
   continueSeason,
   createCareerSetup,
   createSeason,
@@ -18,6 +19,7 @@ const status = document.querySelector("#status");
 const draftPlayers = document.querySelector("#draft-players");
 const teamAssignment = document.querySelector("#team-assignment");
 const draftButton = document.querySelector("#draft-button");
+const teamNameInput = document.querySelector("#team-name");
 const teamSelect = document.querySelector("#team-select");
 const startButton = document.querySelector("#start-button");
 const newSeasonButton = document.querySelector("#new-season-button");
@@ -39,61 +41,158 @@ const historyRounds = document.querySelector("#history-rounds");
 let players = [];
 let setup = null;
 let season = null;
+let draft = [];
+let currentDraftTeam = null;
 
 function setStatus(message, isError = false) {
   status.textContent = message;
   status.classList.toggle("error", isError);
 }
 
-function createPlayerCard(player, index) {
+function createPlayerCard(player, labelText, onSelect = null) {
   const card = document.createElement("article");
   card.className = "player-card";
   const label = document.createElement("div");
   label.className = "eyebrow";
-  label.textContent = `Player ${index + 1}`;
+  label.textContent = labelText;
   const name = document.createElement("strong");
   name.textContent = player.name;
   const rating = document.createElement("div");
   rating.className = "rating";
   rating.textContent = `Overall ${player.rating.toFixed(1)}`;
   card.append(label, name, rating);
+  if (onSelect) {
+    const chooseButton = document.createElement("button");
+    chooseButton.className = "secondary";
+    chooseButton.type = "button";
+    chooseButton.textContent = "Choose player";
+    chooseButton.addEventListener("click", onSelect);
+    card.append(chooseButton);
+  }
   return card;
 }
 
 function renderDraft() {
-  draftPlayers.replaceChildren(
-    ...setup.draft.map((player, index) => createPlayerCard(player, index))
-  );
-  const userTeam = setup.teams.find((team) => team.id === setup.userTeamId);
-  teamAssignment.hidden = false;
-  teamAssignment.textContent = `You’ll take over ${userTeam.name} · ${userTeam.region}`;
+  const sections = [];
+  if (draft.length > 0) {
+    const picksHeading = document.createElement("h3");
+    picksHeading.className = "draft-section-label";
+    picksHeading.textContent = `Your picks (${draft.length}/3)`;
+    sections.push(picksHeading);
+    draft.forEach((player, index) => {
+      sections.push(createPlayerCard(player, `Pick ${index + 1}`));
+    });
+  }
+
+  if (currentDraftTeam) {
+    const teamHeading = document.createElement("h3");
+    teamHeading.className = "draft-section-label";
+    teamHeading.textContent = `${currentDraftTeam.name} · ${currentDraftTeam.region} — choose one`;
+    sections.push(teamHeading);
+    const pickedNames = new Set(draft.map((player) => player.name));
+    currentDraftTeam.players
+      .filter((player) => !pickedNames.has(player.name))
+      .forEach((player) => {
+        sections.push(createPlayerCard(player, "Available", () => selectDraftPlayer(player)));
+      });
+    teamAssignment.hidden = false;
+    teamAssignment.textContent = `Pick ${draft.length + 1} of 3 · Choose a player from this randomly drawn team.`;
+  } else if (draft.length === 3) {
+    const userTeam = setup.teams.find((team) => team.id === setup.userTeamId);
+    teamAssignment.hidden = false;
+    teamAssignment.textContent = `You’ll take over ${userTeam.name} · ${userTeam.region}`;
+  } else {
+    teamAssignment.hidden = false;
+    teamAssignment.textContent = draft.length === 0
+      ? "Draw a random team to make your first pick."
+      : `Pick ${draft.length + 1} of 3 · Draw another random team.`;
+  }
+
+  draftPlayers.replaceChildren(...sections);
+  draftButton.disabled = Boolean(currentDraftTeam) || draft.length === 3;
+  draftButton.textContent = draft.length === 0 ? "Draw a random team" : "Draw the next team";
+  startButton.disabled = draft.length !== 3;
 }
 
-function drawSquad() {
+function drawRandomTeam() {
+  if (draft.length === 3 || currentDraftTeam) return;
   try {
-    setup = createCareerSetup(players, { teamId: teamSelect.value || null });
+    const pickedNames = new Set(draft.map((player) => player.name));
+    const teams = new Map();
+    players.forEach((player) => {
+      if (!player.startingTeam || pickedNames.has(player.name)) return;
+      const roster = teams.get(player.startingTeam) ?? [];
+      roster.push(player);
+      teams.set(player.startingTeam, roster);
+    });
+    const teamRegions = new Map(getDefaultTeams(players).map((team) => [team.name, team.region]));
+    const availableTeams = [...teams.entries()]
+      .filter(([, roster]) => roster.length > 0)
+      .map(([name, roster]) => ({
+        name,
+        region: teamRegions.get(name),
+        players: roster.sort((playerA, playerB) =>
+          playerB.rating - playerA.rating || playerA.name.localeCompare(playerB.name)
+        )
+      }));
+    if (availableTeams.length === 0) {
+      throw new Error("No teams have players available for the next pick.");
+    }
+    currentDraftTeam = availableTeams[Math.floor(Math.random() * availableTeams.length)];
     renderDraft();
-    draftButton.textContent = "Draw again";
-    startButton.disabled = false;
-    setStatus("The other 15 teams use their highest-rated available players; gaps are filled at random.");
+    setStatus("Choose one player from the randomly drawn team.");
   } catch (error) {
     console.error(error);
     setStatus(error.message, true);
   }
 }
 
+function selectDraftPlayer(player) {
+  if (!currentDraftTeam?.players.includes(player) || draft.length >= 3) return;
+  draft.push(player);
+  currentDraftTeam = null;
+  if (draft.length === 3) {
+    try {
+      setup = createCareerSetup(players, {
+        teamId: teamSelect.value || null,
+        teamName: teamNameInput.value,
+        draft
+      });
+      renderDraft();
+      setStatus("Your squad is ready. The other teams use their highest-rated available players.");
+    } catch (error) {
+      console.error(error);
+      setStatus(error.message, true);
+    }
+  } else {
+    renderDraft();
+    setStatus(`Player ${draft.length} selected. Draw another random team for your next pick.`);
+  }
+}
+
 function updateSelectedTeam() {
-  if (!setup) return;
+  if (draft.length !== 3) return;
   try {
     setup = createCareerSetup(players, {
       teamId: teamSelect.value || null,
-      draft: setup.draft
+      teamName: teamNameInput.value,
+      draft
     });
     renderDraft();
   } catch (error) {
     console.error(error);
     setStatus(error.message, true);
   }
+}
+
+function updateTeamName() {
+  if (!setup) return;
+  const userTeam = setup.teams.find((team) => team.id === setup.userTeamId);
+  if (!userTeam) {
+    throw new Error("Could not find your selected team.");
+  }
+  userTeam.name = teamNameInput.value.trim() || "Your Team";
+  renderDraft();
 }
 
 function createMatchCard(match) {
@@ -563,9 +662,13 @@ function renderBracket() {
     bracketNote.textContent = "Six-team double elimination · Best-of-7 · The grand final has no bracket reset.";
   }
   sections = sections.filter(Boolean);
-  if (sections.length === 0) return;
+  if (sections.length === 0) {
+    weekMatches.classList.remove("bracket-current-match");
+    return;
+  }
   bracketContent.replaceChildren(...sections);
   bracketPanel.hidden = false;
+  weekMatches.classList.add("bracket-current-match");
 }
 
 function renderStandingsGroup(region) {
@@ -648,7 +751,53 @@ function renderChampion() {
   if (!champion) return;
   championBanner.textContent = champion.isUserTeam
     ? `You are the RHL champion! ${champion.name} wins the International Championship.`
-    : `${champion.name} wins the RHL International Championship.`;
+    : `${getFinishDescription()} ${champion.name} wins the RHL International Championship.`;
+}
+
+function getFinishDescription() {
+  const rounds = [...season.history];
+  if (season.activeRound?.resultsReady) rounds.push(season.activeRound);
+  const userTeam = season.teams.find((team) => team.id === season.userTeamId);
+
+  for (let roundIndex = rounds.length - 1; roundIndex >= 0; roundIndex -= 1) {
+    const round = rounds[roundIndex];
+    const match = [...round.matches].reverse().find((item) =>
+      item.teamAId === season.userTeamId || item.teamBId === season.userTeamId
+    );
+    if (!match) continue;
+
+    if (round.stage === "international_championship") {
+      const placements = {
+        international_grand_final: "2nd in the International Championship",
+        international_lower_final: "3rd in the International Championship",
+        international_lower_semi: "4th in the International Championship",
+        international_lower_qf_1: "5th–6th in the International Championship",
+        international_lower_qf_2: "5th–6th in the International Championship"
+      };
+      return `You finished ${placements[match.key] ?? "in the International Championship"}.`;
+    }
+
+    if (round.stage === "international_groups" && match.key.includes("lower_final")) {
+      return `You finished 4th in Group ${match.group}.`;
+    }
+
+    if (round.stage === "regional_lcq") {
+      const placement = match.key === "lower_final" ? "3rd" : "4th";
+      return `You finished ${placement} in the ${match.region} Regional LCQ.`;
+    }
+  }
+
+  const standing = getStandings(season, userTeam.region)
+    .findIndex((team) => team.id === season.userTeamId);
+  if (standing !== -1) {
+    const position = standing + 1;
+    const suffix = position % 100 >= 11 && position % 100 <= 13
+      ? "th"
+      : ({ 1: "st", 2: "nd", 3: "rd" }[position % 10] ?? "th");
+    return `You finished ${position}${suffix} in ${userTeam.region} League Play.`;
+  }
+
+  return "You were eliminated before the International Championship.";
 }
 
 function getContinueLabel(round) {
@@ -668,7 +817,7 @@ function getContinueLabel(round) {
     return "Continue to Regional Playoffs";
   }
   if (round.stage === "regional_playoffs" && season.stageRoundIndex === 3) {
-    return "Continue to Regional LCQ";
+    return "Continue to International Groups";
   }
   if (round.stage === "regional_lcq" && season.stageRoundIndex === 1) {
     return "Continue to International Groups";
@@ -686,22 +835,28 @@ function renderCurrentRound() {
     advanceButton.disabled = true;
     advanceButton.textContent = "Season complete";
     const finalRound = season.history[season.history.length - 1];
-    weekMatches.replaceChildren(...finalRound.matches.map(createMatchCard));
+    const userMatches = finalRound.matches.filter((match) =>
+      match.teamAId === season.userTeamId || match.teamBId === season.userTeamId
+    );
+    weekMatches.replaceChildren(...userMatches.map(createMatchCard));
     return;
   }
 
   const round = getCurrentRound(season);
   weekLabel.textContent = round.title;
+  const userMatches = round.matches.filter((match) =>
+    match.teamAId === season.userTeamId || match.teamBId === season.userTeamId
+  );
   weekDescription.textContent = round.resultsReady
-    ? `${round.description} Scores are final; review each game before continuing.`
-    : round.description;
+    ? `${round.description} Your result is final; other matches are simulated automatically.`
+    : `${round.description} Other matches are simulated automatically.`;
   advanceButton.disabled = false;
   advanceButton.textContent = round.resultsReady
     ? getContinueLabel(round)
     : round.stage === "league_play"
       ? `Simulate week ${season.currentWeek + 1}`
-      : "Simulate matches";
-  weekMatches.replaceChildren(...round.matches.map(createMatchCard));
+      : "Simulate your match";
+  weekMatches.replaceChildren(...userMatches.map(createMatchCard));
 }
 
 function renderSeason() {
@@ -720,6 +875,7 @@ function startSeason() {
   if (!setup) return;
   try {
     season = createSeason(setup);
+    advanceToNextUserMatch(season);
     setupScreen.hidden = true;
     seasonScreen.hidden = false;
     renderSeason();
@@ -734,6 +890,7 @@ function advanceSeason() {
     const round = getCurrentRound(season);
     if (round.resultsReady) {
       continueSeason(season);
+      advanceToNextUserMatch(season);
     } else {
       simulateCurrentStep(season);
     }
@@ -748,12 +905,16 @@ function advanceSeason() {
 function resetSeason() {
   setup = null;
   season = null;
+  draft = [];
+  currentDraftTeam = null;
   draftPlayers.replaceChildren();
   teamAssignment.hidden = true;
   teamAssignment.textContent = "";
-  draftButton.textContent = "Draw your three players";
+  teamNameInput.value = "";
+  draftButton.textContent = "Draw a random team";
+  draftButton.disabled = false;
   startButton.disabled = true;
-  setStatus("Draw three players to begin.");
+  setStatus("Draw a random team to make your first pick.");
   seasonScreen.hidden = true;
   setupScreen.hidden = false;
 }
@@ -782,7 +943,7 @@ async function loadPlayers() {
 
     teamSelect.disabled = false;
     draftButton.disabled = false;
-    setStatus(`${players.length} players loaded across ${teamCount} default teams.`);
+    setStatus(`${players.length} players loaded across ${teamCount} default teams. Draw a random team to begin.`);
   } catch (error) {
     console.error(error);
     draftButton.disabled = true;
@@ -790,8 +951,9 @@ async function loadPlayers() {
   }
 }
 
-draftButton.addEventListener("click", drawSquad);
+draftButton.addEventListener("click", drawRandomTeam);
 teamSelect.addEventListener("change", updateSelectedTeam);
+teamNameInput.addEventListener("input", updateTeamName);
 startButton.addEventListener("click", startSeason);
 advanceButton.addEventListener("click", advanceSeason);
 newSeasonButton.addEventListener("click", resetSeason);
