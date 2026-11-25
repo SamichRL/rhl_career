@@ -125,6 +125,7 @@ function buildDefaultTeams(players) {
         id: teamId(index),
         name,
         region,
+        logo: `graphics/s10_logos/${name}.png`,
         players: [...roster]
           .sort((playerA, playerB) =>
             playerB.rating - playerA.rating || playerA.name.localeCompare(playerB.name)

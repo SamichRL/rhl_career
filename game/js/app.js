@@ -49,6 +49,19 @@ function setStatus(message, isError = false) {
   status.classList.toggle("error", isError);
 }
 
+function createTeamLogo(team, className = "team-logo") {
+  if (!team?.logo) return null;
+  const logo = document.createElement("img");
+  logo.className = className;
+  logo.src = team.logo;
+  logo.alt = `${team.name} logo`;
+  logo.loading = "lazy";
+  logo.addEventListener("error", () => {
+    logo.remove();
+  });
+  return logo;
+}
+
 function createPlayerCard(player, labelText, onSelect = null) {
   const card = document.createElement("article");
   card.className = "player-card";
@@ -87,7 +100,10 @@ function renderDraft() {
   if (currentDraftTeam) {
     const teamHeading = document.createElement("h3");
     teamHeading.className = "draft-section-label";
-    teamHeading.textContent = `${currentDraftTeam.name} · ${currentDraftTeam.region} — choose one`;
+    const teamHeadingLogo = createTeamLogo(currentDraftTeam, "team-logo team-logo-small");
+    teamHeading.append(teamHeadingLogo, document.createTextNode(
+      `${currentDraftTeam.name} · ${currentDraftTeam.region} — choose one`
+    ));
     sections.push(teamHeading);
     const pickedNames = new Set(draft.map((player) => player.name));
     currentDraftTeam.players
@@ -125,12 +141,15 @@ function drawRandomTeam() {
       roster.push(player);
       teams.set(player.startingTeam, roster);
     });
-    const teamRegions = new Map(getDefaultTeams(players).map((team) => [team.name, team.region]));
+    const defaultTeamDetails = new Map(
+      getDefaultTeams(players).map((team) => [team.name, team])
+    );
     const availableTeams = [...teams.entries()]
       .filter(([, roster]) => roster.length > 0)
       .map(([name, roster]) => ({
         name,
-        region: teamRegions.get(name),
+        region: defaultTeamDetails.get(name)?.region,
+        logo: defaultTeamDetails.get(name)?.logo,
         players: roster.sort((playerA, playerB) =>
           playerB.rating - playerA.rating || playerA.name.localeCompare(playerB.name)
         )
@@ -209,11 +228,14 @@ function createMatchCard(match) {
 
   const sideA = document.createElement("div");
   sideA.className = "match-team";
+  const identityA = document.createElement("div");
+  identityA.className = "team-name";
   const nameA = document.createElement("strong");
   nameA.textContent = teamA.name;
+  identityA.append(createTeamLogo(teamA), nameA);
   const regionA = document.createElement("small");
   regionA.textContent = teamA.isUserTeam ? "Your team" : teamA.region;
-  sideA.append(nameA, regionA);
+  sideA.append(identityA, regionA);
 
   const score = document.createElement("div");
   score.className = "match-score";
@@ -221,11 +243,14 @@ function createMatchCard(match) {
 
   const sideB = document.createElement("div");
   sideB.className = "match-team";
+  const identityB = document.createElement("div");
+  identityB.className = "team-name";
   const nameB = document.createElement("strong");
   nameB.textContent = teamB.name;
+  identityB.append(createTeamLogo(teamB), nameB);
   const regionB = document.createElement("small");
   regionB.textContent = teamB.isUserTeam ? "Your team" : teamB.region;
-  sideB.append(nameB, regionB);
+  sideB.append(identityB, regionB);
   card.append(sideA, score, sideB);
 
   const gameScores = document.createElement("small");
@@ -302,20 +327,25 @@ function createBracketMatchCard({
 
   const result = match?.result;
   [
-    { team: resolvedTeamA, score: result?.teamAWins, winner: result?.winnerId === resolvedTeamAId },
-    { team: resolvedTeamB, score: result?.teamBWins, winner: result?.winnerId === resolvedTeamBId }
-  ].forEach(({ team, score, winner }) => {
+    { team: resolvedTeamA, teamId: resolvedTeamAId, score: result?.teamAWins, winner: result?.winnerId === resolvedTeamAId },
+    { team: resolvedTeamB, teamId: resolvedTeamBId, score: result?.teamBWins, winner: result?.winnerId === resolvedTeamBId }
+  ].forEach(({ team, teamId, score, winner }) => {
     const row = document.createElement("div");
     row.className = "bracket-team";
     if (winner) row.classList.add("winner");
+    const teamName = document.createElement("span");
+    teamName.className = "bracket-team-name";
+    const teamDetails = season.teams.find((item) => item.id === teamId);
+    if (teamDetails) teamName.append(createTeamLogo(teamDetails, "team-logo team-logo-small"));
     const name = document.createElement("span");
     name.textContent = team;
     if (team === "TBD" || team.startsWith("Winner of") || team.startsWith("Loser of")) {
       name.classList.add("bracket-waiting");
     }
+    teamName.append(name);
     const scoreNode = document.createElement("span");
     scoreNode.textContent = score === undefined ? "" : score;
-    row.append(name, scoreNode);
+    row.append(teamName, scoreNode);
     card.append(row);
   });
   return card;
@@ -338,6 +368,8 @@ function createBracketOutcomeCard(label, teamName) {
   heading.textContent = label;
   const row = document.createElement("div");
   row.className = "bracket-team winner";
+  const teamDetails = season.teams.find((team) => team.name === teamName);
+  if (teamDetails) row.append(createTeamLogo(teamDetails, "team-logo team-logo-small"));
   const name = document.createElement("span");
   name.textContent = teamName;
   row.append(name);
@@ -688,7 +720,12 @@ function renderStandingsGroup(region) {
     const teamCell = document.createElement("td");
     const teamLabel = document.createElement("span");
     teamLabel.className = "standing-team";
-    teamLabel.textContent = `${index + 1}. ${team.name}${team.isUserTeam ? " (You)" : ""}`;
+    teamLabel.append(document.createTextNode(`${index + 1}. `));
+    const logo = createTeamLogo(team);
+    if (logo) teamLabel.append(logo);
+    teamLabel.append(document.createTextNode(
+      `${team.name}${team.isUserTeam ? " (You)" : ""}`
+    ));
     teamCell.append(teamLabel);
     const wins = document.createElement("td");
     wins.textContent = team.seriesWins;
@@ -749,9 +786,14 @@ function renderChampion() {
   const champion = getChampion(season);
   championBanner.hidden = !champion;
   if (!champion) return;
-  championBanner.textContent = champion.isUserTeam
+  championBanner.replaceChildren();
+  const logo = createTeamLogo(champion);
+  if (logo) championBanner.append(logo);
+  const message = document.createElement("span");
+  message.textContent = champion.isUserTeam
     ? `You are the RHL champion! ${champion.name} wins the International Championship.`
     : `${getFinishDescription()} ${champion.name} wins the RHL International Championship.`;
+  championBanner.append(message);
 }
 
 function getFinishDescription() {
@@ -861,7 +903,10 @@ function renderCurrentRound() {
 
 function renderSeason() {
   const userTeam = season.teams.find((team) => team.id === season.userTeamId);
-  seasonTitle.textContent = `${userTeam.name} · ${userTeam.region}`;
+  seasonTitle.replaceChildren();
+  const logo = createTeamLogo(userTeam);
+  if (logo) seasonTitle.append(logo);
+  seasonTitle.append(document.createTextNode(`${userTeam.name} · ${userTeam.region}`));
   stageName.textContent = getStageLabel(season);
   renderStandings();
   renderRoster();

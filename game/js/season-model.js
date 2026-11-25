@@ -1,10 +1,11 @@
-export function createTeam({ id, name, region, roster = [], captain = null, anchors = [], transactions = 2 }) {
+export function createTeam({ id, name, region, logo = null, roster = [], captain = null, anchors = [], transactions = 2 }) {
   const uniqueRoster = [...new Set(roster)];
 
   return {
     id,
     name: name ?? id,
     region: region ?? null,
+    logo,
     roster: uniqueRoster,
     startingLineup: uniqueRoster.slice(0, 3),
     captain,
