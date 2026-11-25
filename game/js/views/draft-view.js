@@ -40,11 +40,12 @@ export function renderDraft({ draft, currentDraftTeam, teamsByName, elements, on
     const pickedNames = new Set(draft.map((player) => player.name));
     const availablePlayers = currentDraftTeam.players
       .filter((player) => !pickedNames.has(player.name));
-    for (let index = 0; index < availablePlayers.length; index += 4) {
-      const rowPlayers = availablePlayers.slice(index, index + 4);
+    const columns = Math.min(3, availablePlayers.length);
+    for (let index = 0; index < availablePlayers.length; index += 3) {
+      const rowPlayers = availablePlayers.slice(index, index + 3);
       const row = document.createElement("div");
       row.className = "player-grid-row";
-      row.style.gridTemplateColumns = `repeat(${rowPlayers.length}, minmax(0, 1fr))`;
+      row.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
       rowPlayers.forEach((player) => {
         row.append(createPlayerCard(player, "Available", () => onSelectPlayer(player), teamsByName));
       });
