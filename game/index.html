@@ -9,13 +9,14 @@
 </head>
 <body>
   <main class="shell">
-    <div class="topline"><span class="topline-mark">◈</span> Rocket Hockey League · Career</div>
-    <h1>Make a run.</h1>
-    <p class="intro">Pick three players from randomly drawn teams, take over a team, and play RHL Season 10 from League Play to the International Championship.</p>
+    <header class="brand-header">
+      <img class="brand-logo" src="./graphics/rhl_logo/s10.png" alt="Rocket Hockey League Season 10 logo">
+      <h1 class="brand-title">Rocket Hockey League - Draft RHL S10 Simulation</h1>
+    </header>
 
     <section id="setup-screen" class="panel" aria-labelledby="setup-title">
       <h2 id="setup-title">Pick your squad</h2>
-      <p>Draw a random team, choose one of its players, and repeat until you have three. Name your team or leave it as “Your Team,” then choose a default team to replace or let the game choose one at random. Season play starts at League Play because qualifier rosters are not included.</p>
+      <p>Draw a random team, choose one of its players, and repeat until you have three. Name your team or leave it as “Your Team,” then choose a default team to replace or let the game choose one at random.</p>
       <div class="setup-controls">
         <label for="team-name">
           Your team name
@@ -27,10 +28,19 @@
             <option value="">Random team (NA or EU/MENA)</option>
           </select>
         </label>
-        <div class="button-row">
-          <button id="draft-button" type="button" disabled>Draw a random team</button>
+      </div>
+      <div class="draft-toolbar">
+        <div class="draft-toolbar-top">
+          <div id="draft-progress" class="draft-progress" aria-live="polite">0 of 3 players picked</div>
+          <div class="button-row">
+            <button id="draft-button" type="button" disabled>Draw a random team</button>
+            <button id="start-button" type="button" disabled>Start the season</button>
+          </div>
         </div>
-        <button id="start-button" type="button" disabled>Start the season</button>
+        <div class="draft-picked-row">
+          <span class="draft-picked-label">Your picks</span>
+          <div id="draft-picked" class="draft-picked" aria-label="Selected players" aria-live="polite"></div>
+        </div>
       </div>
       <p id="team-assignment" class="notice" hidden></p>
       <div id="draft-players" class="player-grid" aria-live="polite"></div>

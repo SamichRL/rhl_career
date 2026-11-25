@@ -16,6 +16,8 @@ const setupScreen = document.querySelector("#setup-screen");
 const seasonScreen = document.querySelector("#season-screen");
 const status = document.querySelector("#status");
 const draftPlayers = document.querySelector("#draft-players");
+const draftPicked = document.querySelector("#draft-picked");
+const draftProgress = document.querySelector("#draft-progress");
 const teamAssignment = document.querySelector("#team-assignment");
 const draftButton = document.querySelector("#draft-button");
 const teamNameInput = document.querySelector("#team-name");
@@ -60,7 +62,7 @@ function renderDraft() {
     currentDraftTeam,
     setup,
     teamsByName: defaultTeamsByName,
-    elements: { draftPlayers, teamAssignment, draftButton, startButton },
+    elements: { draftPlayers, draftPicked, draftProgress, teamAssignment, draftButton, startButton },
     onSelectPlayer: selectDraftPlayer
   });
 }
@@ -94,6 +96,10 @@ function drawRandomTeam() {
     }
     currentDraftTeam = availableTeams[Math.floor(Math.random() * availableTeams.length)];
     renderDraft();
+    document.querySelector("#draft-candidates")?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start"
+    });
     setStatus("Choose one player from the randomly drawn team.");
   } catch (error) {
     console.error(error);
@@ -186,6 +192,8 @@ function resetSeason() {
   draft = [];
   currentDraftTeam = null;
   draftPlayers.replaceChildren();
+  draftPicked.replaceChildren();
+  draftProgress.textContent = "0 of 3 players picked";
   teamAssignment.hidden = true;
   teamAssignment.textContent = "";
   teamNameInput.value = "";
