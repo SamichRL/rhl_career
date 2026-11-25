@@ -11,6 +11,7 @@ import {
 } from "./season-engine.js";
 import { renderDraft as renderDraftView } from "./views/draft-view.js";
 import { createSeasonView } from "./views/season-view.js";
+import { createTeamReelView } from "./views/team-reel.js";
 
 const setupScreen = document.querySelector("#setup-screen");
 const seasonScreen = document.querySelector("#season-screen");
@@ -18,8 +19,8 @@ const status = document.querySelector("#status");
 const draftPlayers = document.querySelector("#draft-players");
 const draftPicked = document.querySelector("#draft-picked");
 const draftProgress = document.querySelector("#draft-progress");
-const teamAssignment = document.querySelector("#team-assignment");
 const draftButton = document.querySelector("#draft-button");
+const teamReel = createTeamReelView(document.querySelector("#team-reel"));
 const teamNameInput = document.querySelector("#team-name");
 const teamSelect = document.querySelector("#team-select");
 const startButton = document.querySelector("#start-button");
@@ -60,15 +61,14 @@ function renderDraft() {
   renderDraftView({
     draft,
     currentDraftTeam,
-    setup,
     teamsByName: defaultTeamsByName,
-    elements: { draftPlayers, draftPicked, draftProgress, teamAssignment, draftButton, startButton },
+    elements: { draftPlayers, draftPicked, draftProgress, draftButton, startButton },
     onSelectPlayer: selectDraftPlayer
   });
 }
 
-function drawRandomTeam() {
-  if (draft.length === 3 || currentDraftTeam) return;
+async function drawRandomTeam() {
+  if (draft.length === 3 || currentDraftTeam || teamReel.isSpinning()) return;
   try {
     const pickedNames = new Set(draft.map((player) => player.name));
     const teams = new Map();
@@ -94,7 +94,12 @@ function drawRandomTeam() {
     if (availableTeams.length === 0) {
       throw new Error("No teams have players available for the next pick.");
     }
-    currentDraftTeam = availableTeams[Math.floor(Math.random() * availableTeams.length)];
+    const drawnTeam = availableTeams[Math.floor(Math.random() * availableTeams.length)];
+    draftButton.disabled = true;
+    draftButton.textContent = "Drawing…";
+    setStatus("Drawing a random team…");
+    await teamReel.spin(availableTeams, drawnTeam);
+    currentDraftTeam = drawnTeam;
     renderDraft();
     document.querySelector("#draft-candidates")?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
@@ -103,6 +108,7 @@ function drawRandomTeam() {
     setStatus("Choose one player from the randomly drawn team.");
   } catch (error) {
     console.error(error);
+    renderDraft();
     setStatus(error.message, true);
   }
 }
@@ -191,15 +197,12 @@ function resetSeason() {
   season = null;
   draft = [];
   currentDraftTeam = null;
-  draftPlayers.replaceChildren();
-  draftPicked.replaceChildren();
-  draftProgress.textContent = "0 of 3 players picked";
-  teamAssignment.hidden = true;
-  teamAssignment.textContent = "";
+  teamReel.reset();
   teamNameInput.value = "";
   draftButton.textContent = "Draw a random team";
   draftButton.disabled = false;
   startButton.disabled = true;
+  renderDraft();
   setStatus("Draw a random team to make your first pick.");
   seasonScreen.hidden = true;
   setupScreen.hidden = false;
@@ -231,7 +234,8 @@ async function loadPlayers() {
 
     teamSelect.disabled = false;
     draftButton.disabled = false;
-    setStatus(`${players.length} players loaded across ${teamCount} default teams. Draw a random team to begin.`);
+    renderDraft();
+    setStatus("Draw a random team to make your first pick.");
   } catch (error) {
     console.error(error);
     draftButton.disabled = true;
