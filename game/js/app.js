@@ -16,6 +16,7 @@ import { createTeamReelView } from "./views/team-reel.js";
 const setupScreen = document.querySelector("#setup-screen");
 const seasonScreen = document.querySelector("#season-screen");
 const status = document.querySelector("#status");
+const setupNotice = document.querySelector("#setup-notice");
 const draftPlayers = document.querySelector("#draft-players");
 const draftPicked = document.querySelector("#draft-picked");
 const draftProgress = document.querySelector("#draft-progress");
@@ -55,6 +56,9 @@ const seasonView = createSeasonView({
 function setStatus(message, isError = false) {
   status.textContent = message;
   status.classList.toggle("error", isError);
+  setupNotice.hidden = !isError;
+  setupNotice.textContent = isError ? message : "";
+  setupNotice.classList.toggle("error", isError);
 }
 
 function renderDraft() {
