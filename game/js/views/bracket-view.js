@@ -39,6 +39,13 @@ export function createBracketView(elements) {
     const resolvedTeamBId = match?.teamBId ?? teamBId;
     const resolvedTeamA = getTeamName(resolvedTeamAId, teamAName);
     const resolvedTeamB = getTeamName(resolvedTeamBId, teamBName);
+    const teamAIsUser = season.teams.find((team) => team.id === resolvedTeamAId)?.isUserTeam;
+    const teamBIsUser = season.teams.find((team) => team.id === resolvedTeamBId)?.isUserTeam;
+    const userOnRight = teamBIsUser && !teamAIsUser;
+    const displayTeamAId = userOnRight ? resolvedTeamBId : resolvedTeamAId;
+    const displayTeamBId = userOnRight ? resolvedTeamAId : resolvedTeamBId;
+    const displayTeamA = userOnRight ? resolvedTeamB : resolvedTeamA;
+    const displayTeamB = userOnRight ? resolvedTeamA : resolvedTeamB;
     const card = document.createElement("article");
     card.className = "bracket-match";
     if (match && season.activeRound?.matches.includes(match)) card.classList.add("current");
@@ -54,8 +61,8 @@ export function createBracketView(elements) {
     card.append(heading);
     const result = match?.result;
     [
-      { team: resolvedTeamA, teamId: resolvedTeamAId, score: result?.teamAWins, winner: result?.winnerId === resolvedTeamAId },
-      { team: resolvedTeamB, teamId: resolvedTeamBId, score: result?.teamBWins, winner: result?.winnerId === resolvedTeamBId }
+      { team: displayTeamA, teamId: displayTeamAId, score: userOnRight ? result?.teamBWins : result?.teamAWins, winner: result?.winnerId === displayTeamAId },
+      { team: displayTeamB, teamId: displayTeamBId, score: userOnRight ? result?.teamAWins : result?.teamBWins, winner: result?.winnerId === displayTeamBId }
     ].forEach(({ team, teamId, score, winner }) => {
       const row = document.createElement("div");
       row.className = "bracket-team";

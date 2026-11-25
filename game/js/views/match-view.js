@@ -3,6 +3,9 @@ import { createTeamLogo } from "./team-logo.js";
 export function createMatchCard(match, season) {
   const teamA = season.teams.find((team) => team.id === match.teamAId);
   const teamB = season.teams.find((team) => team.id === match.teamBId);
+  const userOnRight = teamB.isUserTeam && !teamA.isUserTeam;
+  const leftTeam = userOnRight ? teamB : teamA;
+  const rightTeam = userOnRight ? teamA : teamB;
   const result = match.result;
   const card = document.createElement("article");
   card.className = "match-card";
@@ -16,23 +19,25 @@ export function createMatchCard(match, season) {
   const identityA = document.createElement("div");
   identityA.className = "team-name";
   const nameA = document.createElement("strong");
-  nameA.textContent = teamA.name;
-  identityA.append(createTeamLogo(teamA), nameA);
+  nameA.textContent = leftTeam.name;
+  identityA.append(createTeamLogo(leftTeam), nameA);
   const regionA = document.createElement("small");
-  regionA.textContent = teamA.isUserTeam ? "Your team" : teamA.region;
+  regionA.textContent = leftTeam.isUserTeam ? "Your team" : leftTeam.region;
   sideA.append(identityA, regionA);
   const score = document.createElement("div");
   score.className = "match-score";
-  score.textContent = result ? `${result.teamAWins} – ${result.teamBWins}` : "vs";
+  const leftWins = userOnRight ? result?.teamBWins : result?.teamAWins;
+  const rightWins = userOnRight ? result?.teamAWins : result?.teamBWins;
+  score.textContent = result ? `${leftWins} – ${rightWins}` : "vs";
   const sideB = document.createElement("div");
   sideB.className = "match-team";
   const identityB = document.createElement("div");
   identityB.className = "team-name";
   const nameB = document.createElement("strong");
-  nameB.textContent = teamB.name;
-  identityB.append(createTeamLogo(teamB), nameB);
+  nameB.textContent = rightTeam.name;
+  identityB.append(createTeamLogo(rightTeam), nameB);
   const regionB = document.createElement("small");
-  regionB.textContent = teamB.isUserTeam ? "Your team" : teamB.region;
+  regionB.textContent = rightTeam.isUserTeam ? "Your team" : rightTeam.region;
   sideB.append(identityB, regionB);
   card.append(sideA, score, sideB);
   const gameScores = document.createElement("small");
@@ -41,11 +46,13 @@ export function createMatchCard(match, season) {
   gameScores.style.color = "var(--muted)";
   const scoreLines = result
     ? result.games.map((game) =>
-      `${game.scoreA}-${game.scoreB}${game.overtime ? " OT" : ""}`
+      `${userOnRight ? game.scoreB : game.scoreA}-${userOnRight ? game.scoreA : game.scoreB}${game.overtime ? " OT" : ""}`
     ).join(" · ")
     : "Scheduled";
-  const advantage = match.advantageA || match.advantageB
-    ? ` · Starting advantage ${match.advantageA}-${match.advantageB}`
+  const advantageA = userOnRight ? match.advantageB : match.advantageA;
+  const advantageB = userOnRight ? match.advantageA : match.advantageB;
+  const advantage = advantageA || advantageB
+    ? ` · Starting advantage ${advantageA}-${advantageB}`
     : "";
   gameScores.textContent = `${scoreLines}${advantage}`;
   card.append(gameScores);

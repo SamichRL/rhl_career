@@ -205,7 +205,7 @@ export function createCareerSetup(players, {
 }
 
 function createLeagueWeeks(teams) {
-  const weeks = Array.from({ length: 5 }, (_, index) => ({
+  const weeks = Array.from({ length: 7 }, (_, index) => ({
     number: index + 1,
     matches: []
   }));
@@ -223,7 +223,7 @@ function createLeagueWeeks(teams) {
     const rotation = [...regionTeams].sort((a, b) => a.name.localeCompare(b.name));
 
     for (let roundIndex = 0; roundIndex < 7; roundIndex += 1) {
-      const weekIndex = roundIndex < 3 ? roundIndex : roundIndex < 5 ? 3 : 4;
+      const weekIndex = roundIndex;
       for (let pairIndex = 0; pairIndex < rotation.length / 2; pairIndex += 1) {
         weeks[weekIndex].matches.push({
           id: `${region}-week-${weekIndex + 1}-round-${roundIndex + 1}-match-${pairIndex + 1}`,
@@ -406,9 +406,9 @@ function createLeagueRound(season) {
   const week = season.leagueWeeks[season.currentWeek];
   return newRound(
     "league_play",
-    `League Play · Week ${week.number} of 5`,
+    `League Play · Week ${week.number} of 7`,
     week.matches,
-    "Single round-robin · Best-of-5. Weeks 4 and 5 have two series per team."
+    "Single round-robin · One Best-of-5 series per team this week."
   );
 }
 

@@ -96,9 +96,8 @@ Each region runs an independent **single round-robin** with 8 teams.
 - There are 7 matches per team.
 - 28 unique matches per region.
 - All League Play matches are **Best-of-5**.
-- League Play lasts 5 weeks.
-- One match is scheduled per team in most weeks.
-- 2 of the 5 weeks require 2 matches per team to finish the round-robin.
+- League Play lasts 7 weeks.
+- One match is scheduled per team each week.
 - League Play is a single round-robin stage, not a series of independent game totals.
 
 ### Standings
