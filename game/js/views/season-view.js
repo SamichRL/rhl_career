@@ -137,7 +137,9 @@ export function createSeasonView(elements, teamsByName) {
       : round.stage === "league_play"
         ? `Simulate week ${season.currentWeek + 1}`
         : "Simulate your match";
-    elements.weekMatches.replaceChildren(...userMatches.map((match) => createMatchCard(match, season)));
+    elements.weekMatches.replaceChildren(...userMatches.map((match) => createMatchCard(match, season, {
+      animate: round.resultsReady
+    })));
   }
   function renderSeason(season) {
     const userTeam = season.teams.find((team) => team.id === season.userTeamId);
