@@ -76,7 +76,6 @@
     .setup-grid, .player-grid, .columns { display: grid; gap: 14px; }
     .player-grid { grid-template-columns: minmax(0, 1fr); margin: 18px 0; }
     .player-grid-row { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(150px, 14vw, 220px)), 1fr)); gap: 14px; }
-    #draft-candidates { border-top: 1px solid #ffffff1c; padding-top: 15px; }
     .columns { grid-template-columns: minmax(0, 1.35fr) minmax(280px, .85fr); align-items: start; }
     .match-card {
       border: 1px solid var(--line);
@@ -126,8 +125,6 @@
     .eyebrow { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
     .setup-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 760px; }
     .setup-controls label { display: grid; gap: 7px; font-size: 13px; font-weight: 700; }
-    .draft-heading { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
-    .draft-heading h2 { margin: 0; }
     .draft-layout { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(270px, .9fr); align-items: stretch; gap: 16px; margin-top: 12px; }
     .draft-squad { min-width: 0; }
     .draft-squad-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -366,6 +363,7 @@
       #draft-players .player-card button { width: 100%; padding: 5px 2px; font-size: 8px; }
       .setup-controls { grid-template-columns: 1fr; }
       .draft-layout { grid-template-columns: 1fr; }
+      .draft-picked { border-bottom: 1px solid #ffffff1c; padding-bottom: 10px; }
       .player-grid-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
       .team-reel-name { max-width: 65vw; }
       .season-heading, .section-heading { align-items: flex-start; }

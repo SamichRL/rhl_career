@@ -83,12 +83,12 @@ export function createSeasonView(elements, teamsByName) {
     }
     return "You were eliminated before the International Championship.";
   }
-  function getContinueLabel(round, season) {
+  function getNextSimulationLabel(round, season) {
     if (round.stage === "league_play") {
       const nextWeek = season.currentWeek + 2;
       return nextWeek <= season.leagueWeeks.length
-        ? `Continue to week ${nextWeek}`
-        : "Continue";
+        ? `Simulate week ${nextWeek}`
+        : "Simulate next round";
     }
     if (
       round.stage === "international_championship" &&
@@ -96,19 +96,7 @@ export function createSeasonView(elements, teamsByName) {
     ) {
       return "Finish season";
     }
-    if (round.stage === "league_tiebreak") {
-      return "Continue to Regional Playoffs";
-    }
-    if (round.stage === "regional_playoffs" && season.stageRoundIndex === 3) {
-      return "Continue to International Groups";
-    }
-    if (round.stage === "regional_lcq" && season.stageRoundIndex === 1) {
-      return "Continue to International Groups";
-    }
-    if (round.stage === "international_groups" && season.stageRoundIndex === 1) {
-      return "Continue to Championship Bracket";
-    }
-    return "Continue to next round";
+    return "Simulate next round";
   }
   function renderCurrentRound(season) {
     if (season.stage === "complete") {
@@ -133,14 +121,17 @@ export function createSeasonView(elements, teamsByName) {
     elements.weekDescription.textContent = "";
     elements.weekDescription.hidden = true;
     elements.weekDescription.classList.remove("error");
-    elements.advanceButton.disabled = false;
+    elements.advanceButton.disabled = round.resultsReady;
     elements.advanceButton.textContent = round.resultsReady
-      ? getContinueLabel(round, season)
+      ? getNextSimulationLabel(round, season)
       : round.stage === "league_play"
         ? `Simulate week ${season.currentWeek + 1}`
         : "Simulate your match";
     elements.weekMatches.replaceChildren(...userMatches.map((match) => createMatchCard(match, season, {
-      animate: round.resultsReady
+      animate: round.resultsReady,
+      onAnimationComplete: () => {
+        elements.advanceButton.disabled = false;
+      }
     })));
   }
   function renderSeason(season) {

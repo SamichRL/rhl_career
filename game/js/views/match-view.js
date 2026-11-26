@@ -33,7 +33,7 @@ function makeTeamIdentity(team) {
   return identity;
 }
 
-function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, startWinsB, userOnRight) {
+function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, startWinsB, userOnRight, onComplete) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let winsA = startWinsA;
   let winsB = startWinsB;
@@ -71,10 +71,11 @@ function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, sta
     }
     resultNode.classList.toggle("is-win", winsA > winsB);
     resultNode.classList.toggle("is-loss", winsA < winsB);
+    window.setTimeout(onComplete, 250);
   })();
 }
 
-export function createMatchCard(match, season, { animate = false } = {}) {
+export function createMatchCard(match, season, { animate = false, onAnimationComplete = () => {} } = {}) {
   const teamA = season.teams.find((team) => team.id === match.teamAId);
   const teamB = season.teams.find((team) => team.id === match.teamBId);
   const userOnRight = teamB.isUserTeam && !teamA.isUserTeam;
@@ -172,7 +173,7 @@ export function createMatchCard(match, season, { animate = false } = {}) {
     const advantageA = userOnRight ? match.advantageB ?? 0 : match.advantageA ?? 0;
     const advantageB = userOnRight ? match.advantageA ?? 0 : match.advantageB ?? 0;
     seriesScore.classList.remove("is-win", "is-loss");
-    renderAnimatedScores(cellsA, cellsB, seriesScore, games, advantageA, advantageB, userOnRight);
+    renderAnimatedScores(cellsA, cellsB, seriesScore, games, advantageA, advantageB, userOnRight, onAnimationComplete);
   }
 
   const advantageA = userOnRight ? match.advantageB ?? 0 : match.advantageA ?? 0;

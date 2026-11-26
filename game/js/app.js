@@ -224,10 +224,13 @@ function advanceSeason() {
     const round = getCurrentRound(season);
     if (round.resultsReady) {
       continueSeason(season);
-      advanceToNextUserMatch(season);
-    } else {
-      simulateCurrentStep(season);
+      const nextMatch = advanceToNextUserMatch(season);
+      if (!nextMatch.round || season.stage === "complete") {
+        seasonView(season);
+        return;
+      }
     }
+    simulateCurrentStep(season);
     seasonView(season);
   } catch (error) {
     console.error(error);
