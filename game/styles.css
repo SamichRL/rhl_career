@@ -111,7 +111,6 @@
     .player-card.is-selectable:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
     .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .card-rating { font-size: 34px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
-    .rating-label { margin-top: 3px; color: #aabbd0; font-size: 9px; letter-spacing: .08em; }
     .card-tier { color: var(--tier-color); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
     .player-card-logo { display: flex; min-height: 48px; flex: 1; align-items: center; justify-content: center; pointer-events: none; }
     .player-card-team-logo { width: 74px; height: 74px; object-fit: contain; filter: drop-shadow(0 3px 9px #0009); }
@@ -341,8 +340,8 @@
     }
     [hidden] { display: none !important; }
     @media (max-width: 720px) {
-      .shell { padding-bottom: 16px; }
-      .brand-header { gap: 12px; }
+      .shell { padding-top: 12px; padding-bottom: 16px; }
+      .brand-header { gap: 12px; margin-bottom: 12px; }
       .brand-logo { width: 68px; height: 68px; }
       .brand-title { font-size: clamp(21px, 6vw, 32px); }
       .columns { grid-template-columns: 1fr; }

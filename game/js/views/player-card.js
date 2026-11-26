@@ -32,10 +32,7 @@ export function createPlayerCard(player, labelText, onSelect = null, teamsByName
   const rating = document.createElement("div");
   rating.className = "card-rating";
   rating.textContent = overallRating;
-  const ratingLabel = document.createElement("div");
-  ratingLabel.className = "rating-label";
-  ratingLabel.textContent = "OVERALL";
-  ratingBlock.append(rating, ratingLabel);
+  ratingBlock.append(rating);
   const tier = document.createElement("div");
   tier.className = "card-tier";
   tier.textContent = tierInfo.name;
