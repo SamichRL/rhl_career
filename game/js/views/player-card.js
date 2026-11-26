@@ -14,6 +14,18 @@ export function createPlayerCard(player, labelText, onSelect = null, teamsByName
   const overallRating = Math.round(player.rating);
   const tierInfo = getPlayerTier(overallRating);
   card.className = `player-card ${tierInfo.className}`;
+  if (onSelect) {
+    card.classList.add("is-selectable");
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", `Choose ${player.name}`);
+    card.addEventListener("click", onSelect);
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      onSelect();
+    });
+  }
   const header = document.createElement("div");
   header.className = "card-header";
   const ratingBlock = document.createElement("div");
@@ -56,14 +68,6 @@ export function createPlayerCard(player, labelText, onSelect = null, teamsByName
     label.className = "player-card-label";
     label.textContent = labelText;
     footer.append(label);
-  }
-  if (onSelect) {
-    const chooseButton = document.createElement("button");
-    chooseButton.className = "secondary";
-    chooseButton.type = "button";
-    chooseButton.textContent = "Choose player";
-    chooseButton.addEventListener("click", onSelect);
-    footer.append(chooseButton);
   }
   card.append(header, logoArea, info);
   if (footer.childElementCount) card.append(footer);

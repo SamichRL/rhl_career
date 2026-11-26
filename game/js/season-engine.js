@@ -1,6 +1,6 @@
 const TEAM_SIZE = 3;
 const BASE_GOALS = 2.31;
-const REGIONS = ["NA", "EU/MENA"];
+const REGIONS = ["NA", "EU"];
 const SERIES_FORMATS = {
   bestOfFive: 5,
   bestOfSeven: 7
@@ -112,7 +112,7 @@ function buildDefaultTeams(players) {
     .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
     .map(([name, roster], index) => {
       const regionCounts = roster.reduce((counts, player) => {
-        const region = player.region === "na" ? "NA" : "EU/MENA";
+        const region = player.region === "na" ? "NA" : "EU";
         counts[region] = (counts[region] ?? 0) + 1;
         return counts;
       }, {});
@@ -622,7 +622,7 @@ function createInternationalGroups(season, random) {
     })
   );
   const shuffledNA = shuffle(entrantsByRegion.NA, random);
-  const shuffledEU = shuffle(entrantsByRegion["EU/MENA"], random);
+  const shuffledEU = shuffle(entrantsByRegion.EU, random);
   season.internationalGroups = {
     A: [...shuffledNA.slice(0, 2), ...shuffledEU.slice(0, 2)],
     B: [...shuffledNA.slice(2), ...shuffledEU.slice(2)],

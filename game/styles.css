@@ -42,7 +42,7 @@
       color: #f3f4f6;
     }
     input::placeholder { color: var(--muted); opacity: .55; }
-    .shell { max-width: 1080px; margin: 0 auto; padding: 30px 20px 56px; }
+    .shell { width: 100%; margin: 0; padding: 30px clamp(16px, 3vw, 44px) 56px; }
     .topline {
       display: flex;
       align-items: center;
@@ -74,8 +74,9 @@
       box-shadow: 0 14px 36px #060b1429;
     }
     .setup-grid, .player-grid, .columns { display: grid; gap: 14px; }
-    .player-grid { margin: 18px 0; }
-    .player-grid-row { display: grid; grid-column: 1 / -1; gap: 14px; }
+    .player-grid { grid-template-columns: minmax(0, 1fr); margin: 18px 0; }
+    .player-grid-row { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(150px, 14vw, 220px)), 1fr)); gap: 14px; }
+    #draft-candidates { border-top: 1px solid #ffffff1c; padding-top: 15px; }
     .columns { grid-template-columns: minmax(0, 1.35fr) minmax(280px, .85fr); align-items: start; }
     .match-card {
       border: 1px solid var(--line);
@@ -106,6 +107,9 @@
     .player-card.elite { --tier-color: #bd72ff; --tier-glow: 0 0 12px #bd72ff66; }
     .player-card.legendary { --tier-color: #f4c84c; --tier-glow: 0 0 12px #f4c84c66; }
     .player-card.iconic { --tier-color: #ff303f; --tier-glow: 0 0 12px #ff303f66; }
+    .player-card.is-selectable { cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
+    .player-card.is-selectable:hover { transform: translateY(-2px); }
+    .player-card.is-selectable:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
     .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .card-rating { font-size: 34px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
     .rating-label { margin-top: 3px; color: #aabbd0; font-size: 9px; letter-spacing: .08em; }
@@ -119,15 +123,6 @@
     .player-card-footer { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 7px; margin-top: 7px; }
     .player-card-label { color: #aabbd0; font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
     .player-card button { margin: 0; padding: 7px 9px; font-size: 11px; }
-    .draft-section-label {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 8px 0 0;
-      color: var(--accent);
-      scroll-margin-top: 20px;
-    }
     .eyebrow { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
     .setup-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 760px; }
     .setup-controls label { display: grid; gap: 7px; font-size: 13px; font-weight: 700; }
@@ -152,6 +147,7 @@
     .picked-slot-empty { align-self: center; margin: auto 0; color: #8797ac; font-size: 12px; font-weight: 700; }
     .reel-column { display: grid; align-content: start; gap: 8px; min-width: 0; }
     .reel-column > button { width: 100%; }
+    .reel-column > #draft-players { margin: 0; }
     .team-reel { margin: 0; padding: 14px; text-align: center; }
     .team-reel-title { margin: 0 0 8px; color: #e8f1fa; font-size: 14px; }
     .team-reel-window {
@@ -352,6 +348,12 @@
       .brand-logo { width: 68px; height: 68px; }
       .brand-title { font-size: clamp(21px, 6vw, 32px); }
       .columns { grid-template-columns: 1fr; }
+      .picked-roster-card, .picked-player-slot { min-height: 126px; }
+      .picked-roster-card { padding: 6px; }
+      .picked-roster-card .card-rating { font-size: 21px; }
+      .picked-roster-card .player-card-logo { min-height: 25px; }
+      .picked-roster-card .player-card-team-logo { width: 38px; height: 38px; }
+      .picked-roster-card .player-name { font-size: 11px; }
       #draft-players .player-card { min-height: 126px; padding: 6px; }
       #draft-players .card-rating { font-size: 21px; }
       #draft-players .card-tier { font-size: 8px; }
@@ -363,6 +365,7 @@
       #draft-players .player-card button { width: 100%; padding: 5px 2px; font-size: 8px; }
       .setup-controls { grid-template-columns: 1fr; }
       .draft-layout { grid-template-columns: 1fr; }
+      .player-grid-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
       .team-reel-name { max-width: 65vw; }
       .season-heading, .section-heading { align-items: flex-start; }
       .panel { padding: 17px; }

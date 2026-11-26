@@ -41,6 +41,6 @@ function renderStandingsGroup(region, season) {
 export function renderStandings(season, standingsContainer) {
   standingsContainer.replaceChildren(
     renderStandingsGroup("NA", season),
-    renderStandingsGroup("EU/MENA", season)
+    renderStandingsGroup("EU", season)
   );
 }

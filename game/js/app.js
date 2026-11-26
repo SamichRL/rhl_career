@@ -21,7 +21,11 @@ const draftPlayers = document.querySelector("#draft-players");
 const draftPicked = document.querySelector("#draft-picked");
 const draftProgress = document.querySelector("#draft-progress");
 const draftButton = document.querySelector("#draft-button");
-const teamReel = createTeamReelView(document.querySelector("#team-reel"));
+const teamReelElement = document.querySelector("#team-reel");
+const reelColumn = teamReelElement.parentElement;
+const draftLayout = document.querySelector(".draft-layout");
+const stackedDraftLayout = window.matchMedia("(max-width: 720px)");
+const teamReel = createTeamReelView(teamReelElement);
 const teamNameInput = document.querySelector("#team-name");
 const teamSelect = document.querySelector("#team-select");
 const startButton = document.querySelector("#start-button");
@@ -46,7 +50,31 @@ let setup = null;
 let season = null;
 let draft = [];
 let currentDraftTeam = null;
+let draftChoicesVisible = false;
 let defaultTeamsByName = new Map();
+
+function syncDraftLayout() {
+  if (!stackedDraftLayout.matches) {
+    if (currentDraftTeam) draftChoicesVisible = true;
+    teamReelElement.hidden = false;
+    draftPlayers.hidden = false;
+    draftLayout.after(draftPlayers);
+    return;
+  }
+
+  if (currentDraftTeam && draftChoicesVisible) {
+    teamReelElement.hidden = true;
+    reelColumn.append(draftPlayers);
+    draftPlayers.hidden = false;
+    return;
+  }
+
+  teamReelElement.hidden = false;
+  draftPlayers.hidden = true;
+  draftLayout.after(draftPlayers);
+}
+
+stackedDraftLayout.addEventListener("change", syncDraftLayout);
 const seasonView = createSeasonView({
   seasonTitle, stageName, weekLabel, weekDescription, weekMatches, standings: standingsContainer,
   userRoster, championBanner, matchHistory, historyRounds, advanceButton,
@@ -69,6 +97,7 @@ function renderDraft() {
     elements: { draftPlayers, draftPicked, draftProgress, draftButton, startButton },
     onSelectPlayer: selectDraftPlayer
   });
+  syncDraftLayout();
 }
 
 async function drawRandomTeam() {
@@ -104,7 +133,16 @@ async function drawRandomTeam() {
     setStatus("Drawing a random team…");
     await teamReel.spin(availableTeams, drawnTeam);
     currentDraftTeam = drawnTeam;
+    draftChoicesVisible = false;
     renderDraft();
+    if (stackedDraftLayout.matches) {
+      setStatus("Team drawn. Player choices will appear shortly.");
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (currentDraftTeam === drawnTeam && stackedDraftLayout.matches) {
+        draftChoicesVisible = true;
+        syncDraftLayout();
+      }
+    }
     document.querySelector("#draft-candidates")?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       block: "start"
@@ -121,6 +159,8 @@ function selectDraftPlayer(player) {
   if (!currentDraftTeam?.players.includes(player) || draft.length >= 3) return;
   draft.push(player);
   currentDraftTeam = null;
+  draftChoicesVisible = false;
+  if (stackedDraftLayout.matches) teamReel.reset();
   if (draft.length === 3) {
     try {
       setup = createCareerSetup(players, {
@@ -231,7 +271,7 @@ async function loadPlayers() {
     if (teamCount !== 16) {
       throw new Error(`Expected 16 default teams in player_ratings_assigned.csv, found ${teamCount}.`);
     }
-    teamSelect.replaceChildren(new Option("Random team (NA or EU/MENA)", ""));
+    teamSelect.replaceChildren(new Option("Team to Replace (Default is Random)", ""));
     getDefaultTeams(players).forEach((team) => {
       teamSelect.add(new Option(`${team.name} (${team.region})`, team.id));
     });

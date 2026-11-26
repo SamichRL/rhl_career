@@ -14,18 +14,16 @@
       <h1 class="brand-title">Rocket Hockey League - Draft RHL S10 Simulation</h1>
     </header>
 
-    <section id="setup-screen" class="panel" aria-label="Team setup and draft">
+    <section id="setup-screen" aria-label="Team setup and draft">
       <div class="setup-controls">
-        <label for="team-name">
-          Your team name
-          <input id="team-name" type="text" maxlength="40" placeholder="Your Team" autocomplete="off">
-        </label>
-        <label for="team-select">
-          Team to replace
-          <select id="team-select" disabled>
-            <option value="">Random team (NA or EU/MENA)</option>
+        <div class="setup-field">
+          <input id="team-name" type="text" maxlength="40" placeholder="Your Team (Enter name here)" autocomplete="off" aria-label="Your team name">
+        </div>
+        <div class="setup-field">
+          <select id="team-select" disabled aria-label="Team to replace">
+            <option value="">Team to Replace (Default is Random)</option>
           </select>
-        </label>
+        </div>
       </div>
       <p id="setup-notice" class="notice" role="alert" hidden></p>
       <div class="draft-heading">
@@ -43,7 +41,7 @@
           <div id="draft-picked" class="draft-picked" aria-label="Your three player slots" aria-live="polite"></div>
         </section>
         <div class="reel-column">
-          <section id="team-reel" class="team-reel panel" aria-label="Random team draw"></section>
+          <section id="team-reel" class="team-reel" aria-label="Random team draw"></section>
           <button id="start-button" type="button" disabled hidden>Start the season</button>
         </div>
       </div>

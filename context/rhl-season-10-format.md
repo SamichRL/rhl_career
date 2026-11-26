@@ -8,16 +8,16 @@ are treated as the simulation rules.
 
 ## 1. Season overview
 
-- 2 regions: North America (NA) and Europe/Middle East/North Africa (EU/MENA).
+- 2 regions: North America (NA) and Europe (EU).
 - 8 teams per region enter League Play.
 - Each region also has 3 placement qualifiers:
   - Qualifier 1 sends 3 teams.
   - Qualifier 2 sends 3 teams.
   - Qualifier 3 sends 2 teams.
-- 16 total teams enter League Play: 8 NA and 8 EU/MENA.
+- 16 total teams enter League Play: 8 NA and 8 EU.
 - 4 teams per region advance through the Regional Playoffs.
 - 2 additional teams per region advance through their Last Chance Qualifier.
-- 8 teams reach the International Playoffs: 4 NA and 4 EU/MENA.
+- 8 teams reach the International Playoffs: 4 NA and 4 EU.
 
 ## 2. Teams and roster context
 
@@ -55,11 +55,11 @@ are treated as the simulation rules.
 ### League/regional match server context
 
 - NA: US-East, US-Central, or US-West; US-Central is the default.
-- EU/MENA: Europe or Middle East; Europe is the default.
+- EU: Europe is the default server.
 - In BO5 or BO7 series, the higher seed selects the server for Games 1, 3, and 5.
 - The lower seed selects the server for Games 2 and 4.
 - Game 6 and later are not assigned a server in the handbook's rotation rules.
-- International matches alternate between NA and EU/MENA regions:
+- International matches alternate between NA and EU regions:
   - US-East and Europe are the only stated servers.
 - In the International Upper Bracket Final, the team with the better overall record
   receives server priority. If records are equal, NA receives priority.
@@ -230,7 +230,7 @@ Lower Bracket Final
 
 - 8 teams total.
 - 4 NA teams.
-- 4 EU/MENA teams.
+- 4 EU teams.
 - Each region supplies:
   - 1 Regional Grand Final winner.
   - 1 Regional Grand Final loser.
@@ -240,9 +240,9 @@ Lower Bracket Final
 
 Teams are split into Group A and Group B.
 
-- Each group has 4 teams: 2 NA and 2 EU/MENA.
+- Each group has 4 teams: 2 NA and 2 EU.
 - The exact original group draw/seeding process is not specified in the handbook.
-  For a simulator, balance each group with 2 NA and 2 EU/MENA teams, and use a
+  For a simulator, balance each group with 2 NA and 2 EU teams, and use a
   reproducible seed-based or regional-seed drawing method.
 - Each group uses a 4-team double-elimination bracket.
 - All group matches are **Best-of-5**.
@@ -321,7 +321,7 @@ Use the following state and progression rules for a complete season:
 - International entrants are determined by:
   - 2 regional Grand Finalists.
   - 2 regional LCQ winners.
-- International groups should contain 2 NA and 2 EU/MENA teams.
+- International groups should contain 2 NA and 2 EU teams.
 - Advance 3 teams from each group, then enter the 6-team Championship bracket.
 
 ### Series format quick reference

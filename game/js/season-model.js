@@ -75,7 +75,7 @@ export function createSeason({ id, seed = Date.now(), name = "RHL Season 10" }) 
     players: {},
     standings: {
       NA: {},
-      "EU/MENA": {}
+      EU: {}
     },
     matches: [],
     brackets: {},
