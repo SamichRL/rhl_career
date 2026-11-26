@@ -232,6 +232,7 @@ function advanceSeason() {
   } catch (error) {
     console.error(error);
     weekDescription.textContent = error.message;
+    weekDescription.hidden = false;
     weekDescription.classList.add("error");
   }
 }

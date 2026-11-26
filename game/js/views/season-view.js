@@ -113,7 +113,9 @@ export function createSeasonView(elements, teamsByName) {
   function renderCurrentRound(season) {
     if (season.stage === "complete") {
       elements.weekLabel.textContent = "Season complete";
-      elements.weekDescription.textContent = "All RHL Season 10 stages are complete.";
+      elements.weekDescription.textContent = "";
+      elements.weekDescription.hidden = true;
+      elements.weekDescription.classList.remove("error");
       elements.advanceButton.disabled = true;
       elements.advanceButton.textContent = "Season complete";
       const finalRound = season.history[season.history.length - 1];
@@ -128,9 +130,9 @@ export function createSeasonView(elements, teamsByName) {
     const userMatches = round.matches.filter((match) =>
       match.teamAId === season.userTeamId || match.teamBId === season.userTeamId
     );
-    elements.weekDescription.textContent = round.resultsReady
-      ? `${round.description} Your result is final; other matches are simulated automatically.`
-      : `${round.description} Other matches are simulated automatically.`;
+    elements.weekDescription.textContent = "";
+    elements.weekDescription.hidden = true;
+    elements.weekDescription.classList.remove("error");
     elements.advanceButton.disabled = false;
     elements.advanceButton.textContent = round.resultsReady
       ? getContinueLabel(round, season)

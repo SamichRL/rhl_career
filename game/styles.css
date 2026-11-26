@@ -64,7 +64,7 @@
     }
     h3 { margin: 0 0 4px; font-size: 15px; }
     p { color: var(--muted); line-height: 1.55; }
-    .week-panel { margin: 18px 0; }
+    .week-panel { margin: 18px 0; padding-top: 14px; }
     .week-description { margin: 9px 0 0; }
     .panel {
       border: 1px solid var(--line);
@@ -201,7 +201,7 @@
       justify-content: space-between;
       gap: 16px;
     }
-    .week-heading { margin: 20px 0 12px; }
+    .week-heading { margin: 6px 0 12px; }
     .week-pill {
       flex: none;
       border: 1px solid #337c77;
