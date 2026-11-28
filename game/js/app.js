@@ -29,21 +29,19 @@ const teamReel = createTeamReelView(teamReelElement);
 const teamNameInput = document.querySelector("#team-name");
 const teamSelect = document.querySelector("#team-select");
 const startButton = document.querySelector("#start-button");
-const newSeasonButton = document.querySelector("#new-season-button");
 const advanceButton = document.querySelector("#advance-button");
 const seasonTitle = document.querySelector("#season-title");
-const stageName = document.querySelector("#stage-name");
-const weekLabel = document.querySelector("#week-label");
 const weekDescription = document.querySelector("#week-description");
 const weekMatches = document.querySelector("#week-matches");
 const standingsContainer = document.querySelector("#standings");
-const userRoster = document.querySelector("#user-roster");
 const championBanner = document.querySelector("#champion-banner");
 const bracketPanel = document.querySelector("#bracket-panel");
 const bracketNote = document.querySelector("#bracket-note");
 const bracketContent = document.querySelector("#bracket-content");
 const matchHistory = document.querySelector("#match-history");
 const historyRounds = document.querySelector("#history-rounds");
+// TEMP TEST SHORTCUT: remove this binding and startPresetTestSeason() after testing.
+const temporaryTestShortcut = document.querySelector("#temporary-test-shortcut");
 
 let players = [];
 let setup = null;
@@ -83,8 +81,8 @@ function syncDraftLayout() {
 
 stackedDraftLayout.addEventListener("change", syncDraftLayout);
 const seasonView = createSeasonView({
-  seasonTitle, stageName, weekLabel, weekDescription, weekMatches, standings: standingsContainer,
-  userRoster, championBanner, matchHistory, historyRounds, advanceButton,
+  seasonTitle, weekDescription, weekMatches, standings: standingsContainer,
+  championBanner, matchHistory, historyRounds, advanceButton,
   bracketPanel, bracketNote, bracketContent
 }, defaultTeamsByName);
 
@@ -226,6 +224,37 @@ function startSeason() {
   }
 }
 
+// TEMP TEST SHORTCUT: logo click skips drafting with DRKY, Pacify, and Pegs,
+// chooses a random default team to replace, and starts the season immediately.
+function startPresetTestSeason() {
+  if (!players.length) return;
+  const requiredNames = ["drky", "pacify", "pegs"];
+  const playersByName = new Map(players.map((player) => [player.name.toLowerCase(), player]));
+  const presetDraft = requiredNames.map((name) => playersByName.get(name));
+  if (presetDraft.some((player) => !player)) {
+    setStatus("Temporary test squad could not be found in the player pool.", true);
+    return;
+  }
+  const teams = getDefaultTeams(players);
+  const replacementTeam = teams[Math.floor(Math.random() * teams.length)];
+  teamSelect.value = replacementTeam.id;
+  teamNameInput.value = "Your Team";
+  draft = presetDraft;
+  currentDraftTeam = null;
+  draftChoicesVisible = false;
+  try {
+    setup = createCareerSetup(players, {
+      teamId: replacementTeam.id,
+      teamName: teamNameInput.value,
+      draft
+    });
+    startSeason();
+  } catch (error) {
+    console.error(error);
+    setStatus(error.message, true);
+  }
+}
+
 function advanceSeason() {
   try {
     const round = getCurrentRound(season);
@@ -245,22 +274,6 @@ function advanceSeason() {
     weekDescription.hidden = false;
     weekDescription.classList.add("error");
   }
-}
-
-function resetSeason() {
-  setup = null;
-  season = null;
-  draft = [];
-  currentDraftTeam = null;
-  teamReel.reset();
-  teamNameInput.value = "";
-  draftButton.textContent = "Draw a random team";
-  draftButton.disabled = false;
-  startButton.disabled = true;
-  renderDraft();
-  setStatus("Draw a random team to make your first pick.");
-  seasonScreen.hidden = true;
-  setupScreen.hidden = false;
 }
 
 async function loadPlayers() {
@@ -303,6 +316,7 @@ teamSelect.addEventListener("change", updateSelectedTeam);
 teamNameInput.addEventListener("input", updateTeamName);
 startButton.addEventListener("click", startSeason);
 advanceButton.addEventListener("click", advanceSeason);
-newSeasonButton.addEventListener("click", resetSeason);
+// TEMP TEST SHORTCUT: remove this listener after testing.
+temporaryTestShortcut.addEventListener("click", startPresetTestSeason);
 
 loadPlayers();

@@ -228,7 +228,7 @@ function createLeagueWeeks(teams) {
         weeks[weekIndex].matches.push({
           id: `${region}-week-${weekIndex + 1}-round-${roundIndex + 1}-match-${pairIndex + 1}`,
           key: `${region}-round-${roundIndex + 1}-match-${pairIndex + 1}`,
-          label: `${region} League Play · Round ${roundIndex + 1}, Match ${pairIndex + 1}`,
+          label: `${region} League Play · Week ${weekIndex + 1} of 7`,
           region,
           teamAId: rotation[pairIndex].id,
           teamBId: rotation[rotation.length - 1 - pairIndex].id,

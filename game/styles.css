@@ -44,7 +44,7 @@
     input::placeholder { color: var(--muted); opacity: .55; }
     .shell {
       width: 100%;
-      max-width: min(60vw, 1152px);
+      max-width: 1400px;
       margin-inline: auto;
       padding: 30px clamp(16px, 3vw, 44px) 56px;
     }
@@ -60,6 +60,9 @@
     }
     .brand-header { display: flex; align-items: center; gap: 16px; margin: 0 0 24px; }
     .brand-logo { width: 92px; height: 92px; flex: 0 0 auto; object-fit: contain; }
+    /* TEMP TEST SHORTCUT: styling for the clickable RHL logo; remove with shortcut. */
+    .brand-logo-button { display: block; flex: 0 0 auto; padding: 0; border: 0; background: transparent; cursor: pointer; }
+    .brand-logo-button .brand-logo { display: block; }
     .brand-title { margin: 0; font-size: clamp(25px, 4vw, 42px); letter-spacing: -.035em; line-height: 1.08; }
     h2 { margin: 0 0 8px; font-size: 21px; }
     #season-title {
@@ -67,9 +70,42 @@
       align-items: center;
       gap: 9px;
     }
+    #season-title.season-title-layout { width: 100%; flex-wrap: wrap; gap: 12px 20px; }
+    .season-team-identity { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; }
+    .season-team-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .season-team-region { color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .season-player-strip { display: grid; flex: 1 1 600px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .season-player-card {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--tier-color, #aeb7c2);
+      border-radius: 9px;
+      padding: 7px 9px;
+      background: linear-gradient(145deg, #172b42, #091321);
+      box-shadow: var(--tier-glow, 0 0 4px #aeb7c222);
+      font-size: 11px;
+    }
+    .season-player-card.basic { --tier-color: #aeb7c2; --tier-glow: 0 0 4px #aeb7c222; }
+    .season-player-card.uncommon { --tier-color: #39d66f; --tier-glow: 0 0 8px #39d66f44; }
+    .season-player-card.rare { --tier-color: #4b9cff; --tier-glow: 0 0 8px #4b9cff44; }
+    .season-player-card.elite { --tier-color: #bd72ff; --tier-glow: 0 0 8px #bd72ff44; }
+    .season-player-card.legendary { --tier-color: #f4c84c; --tier-glow: 0 0 8px #f4c84c44; }
+    .season-player-card.iconic { --tier-color: #ff303f; --tier-glow: 0 0 8px #ff303f44; }
+    .season-player-rating { color: var(--tier-color); font-size: 19px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    .season-player-team-logo { flex: 0 0 22px; width: 22px; height: 22px; object-fit: contain; }
+    .season-player-details { display: grid; min-width: 0; gap: 2px; }
+    .season-player-name, .season-player-team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .season-player-name { font-size: 11px; font-weight: 850; }
+    .season-player-team { color: var(--muted); font-size: 9px; font-weight: 600; }
+    .season-player-tier { margin-left: auto; color: var(--tier-color); font-size: 8px; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+    .season-heading { align-items: stretch; }
+    .season-heading > div:first-child { display: flex; min-width: 0; flex: 1; align-items: stretch; }
+    .season-heading > button { align-self: stretch; }
     h3 { margin: 0 0 4px; font-size: 15px; }
     p { color: var(--muted); line-height: 1.55; }
-    .week-panel { margin: 18px 0; padding-top: 14px; }
+    .week-panel { margin: 18px 0; }
     .week-description { margin: 9px 0 0; }
     .panel {
       border: 1px solid var(--line);
@@ -256,6 +292,8 @@
     .match-game-score { z-index: 1; display: grid; min-width: 0; place-items: center; color: #c8d3e0; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; opacity: 0; transform: translateY(3px); transition: opacity .25s ease, transform .25s ease; }
     .match-game-score.is-visible { opacity: 1; transform: translateY(0); }
     .match-game-score.is-winner { color: #ffe08b; text-shadow: 0 0 7px #ffca4e88; }
+    .match-game-score.is-user-win { color: #ffe08b; text-shadow: 0 0 7px #ffca4e88; }
+    .match-game-score.is-user-loss { color: #ff8585; text-shadow: 0 0 7px #ff5b5b88; }
     .match-series-score { z-index: 1; display: grid; min-width: 0; place-items: center; color: var(--muted); font-size: clamp(19px, 2.8vw, 27px); font-weight: 900; font-variant-numeric: tabular-nums; text-align: center; opacity: .75; transition: color .25s ease, text-shadow .25s ease; }
     .match-series-score.is-visible { opacity: 1; }
     .match-series-score.is-win { color: #ffe08b; text-shadow: 0 0 7px #ffca4e88, 0 0 15px #ffbd3666; }
@@ -345,7 +383,6 @@
     }
     [hidden] { display: none !important; }
     @media (max-width: 720px) {
-      .shell { max-width: 100%; }
       .shell { padding-top: 12px; padding-bottom: 16px; }
       .brand-header { gap: 12px; margin-bottom: 12px; }
       .brand-logo { width: 68px; height: 68px; }
@@ -372,6 +409,14 @@
       .player-grid-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
       .team-reel-name { max-width: 65vw; }
       .season-heading, .section-heading { align-items: flex-start; }
+      .season-heading { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .season-heading > div:first-child { display: block; }
+      .season-player-strip { flex-basis: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+      .season-player-card { gap: 5px; padding: 6px; }
+      .season-player-team-logo, .season-player-tier { display: none; }
+      .season-player-rating { font-size: 16px; }
+      .season-player-details { flex: 1; }
+      .season-heading > button { width: 100%; }
       .panel { padding: 17px; }
       th, td { padding: 8px 4px; }
       .match-card { padding: 12px; }

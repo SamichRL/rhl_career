@@ -2,17 +2,22 @@ import { createTeamLogo } from "./team-logo.js";
 
 const wait = (duration) => new Promise((resolve) => setTimeout(resolve, duration));
 
-function animatePair(fromA, toA, fromB, toB, duration, update) {
+function animateGoals(toA, toB, update) {
   return new Promise((resolve) => {
     const start = performance.now();
+    const durationPerGoal = 150;
+    const totalDuration = Math.max(toA, toB) * durationPerGoal;
     const frame = (now) => {
-      const progress = Math.min(1, (now - start) / duration);
+      const elapsed = now - start;
       update(
-        Math.floor(fromA + (toA - fromA) * progress),
-        Math.floor(fromB + (toB - fromB) * progress)
+        Math.min(toA, Math.floor(elapsed / durationPerGoal)),
+        Math.min(toB, Math.floor(elapsed / durationPerGoal))
       );
-      if (progress < 1) requestAnimationFrame(frame);
-      else resolve();
+      if (elapsed < totalDuration) requestAnimationFrame(frame);
+      else {
+        update(toA, toB);
+        resolve();
+      }
     };
     requestAnimationFrame(frame);
   });
@@ -33,7 +38,7 @@ function makeTeamIdentity(team) {
   return identity;
 }
 
-function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, startWinsB, userOnRight, onComplete) {
+function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, startWinsB, userOnRight, userIsA, onComplete) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let winsA = startWinsA;
   let winsB = startWinsB;
@@ -57,14 +62,21 @@ function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, sta
         cellA.textContent = scoreA;
         cellB.textContent = scoreB;
       } else {
-        await animatePair(0, scoreA, 0, scoreB, 500, (countA, countB) => {
+        await animateGoals(scoreA, scoreB, (countA, countB) => {
           cellA.textContent = countA;
           cellB.textContent = countB;
         });
       }
       const aWon = scoreA > scoreB;
-      cellA.classList.toggle("is-winner", aWon);
-      cellB.classList.toggle("is-winner", !aWon);
+      if (userIsA !== null) {
+        const userCell = userIsA ? cellA : cellB;
+        userCell.classList.add("is-user-score");
+        userCell.classList.toggle("is-user-win", userIsA ? aWon : !aWon);
+        userCell.classList.toggle("is-user-loss", userIsA ? !aWon : aWon);
+      } else {
+        cellA.classList.toggle("is-winner", aWon);
+        cellB.classList.toggle("is-winner", !aWon);
+      }
       if (aWon) winsA += 1;
       else winsB += 1;
       resultNode.textContent = `${winsA}–${winsB}`;
@@ -152,13 +164,24 @@ export function createMatchCard(match, season, { animate = false, onAnimationCom
     const aWon = scoreA > scoreB;
     const cellA = cellsA[index];
     const cellB = cellsB[index];
+    const userIsA = userOnRight || teamA.isUserTeam;
+    const isUserMatch = teamA.isUserTeam || teamB.isUserTeam;
+    if (isUserMatch && !animate) {
+      const userCell = userIsA ? cellA : cellB;
+      const userWon = userIsA ? aWon : !aWon;
+      userCell.classList.add("is-user-score");
+      userCell.classList.toggle("is-user-win", userWon);
+      userCell.classList.toggle("is-user-loss", !userWon);
+    }
     if (!animate) {
       cellA.textContent = scoreA;
       cellB.textContent = scoreB;
       cellA.classList.add("is-visible");
       cellB.classList.add("is-visible");
-      cellA.classList.toggle("is-winner", aWon);
-      cellB.classList.toggle("is-winner", !aWon);
+      if (!isUserMatch) {
+        cellA.classList.toggle("is-winner", aWon);
+        cellB.classList.toggle("is-winner", !aWon);
+      }
     }
     if (game.overtime) {
       cellA.title = `Game ${index + 1}, overtime`;
@@ -173,7 +196,8 @@ export function createMatchCard(match, season, { animate = false, onAnimationCom
     const advantageA = userOnRight ? match.advantageB ?? 0 : match.advantageA ?? 0;
     const advantageB = userOnRight ? match.advantageA ?? 0 : match.advantageB ?? 0;
     seriesScore.classList.remove("is-win", "is-loss");
-    renderAnimatedScores(cellsA, cellsB, seriesScore, games, advantageA, advantageB, userOnRight, onAnimationComplete);
+    const userIsA = teamA.isUserTeam || teamB.isUserTeam ? userOnRight || teamA.isUserTeam : null;
+    renderAnimatedScores(cellsA, cellsB, seriesScore, games, advantageA, advantageB, userOnRight, userIsA, onAnimationComplete);
   }
 
   const advantageA = userOnRight ? match.advantageB ?? 0 : match.advantageA ?? 0;

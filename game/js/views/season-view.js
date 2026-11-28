@@ -1,21 +1,12 @@
-import { getChampion, getCurrentRound, getStageLabel, getStandings } from "../season-engine.js";
+import { getChampion, getCurrentRound, getStandings } from "../season-engine.js";
 import { createMatchCard } from "./match-view.js";
-import { createPlayerCard } from "./player-card.js";
+import { getPlayerTier } from "./player-card.js";
 import { createTeamLogo } from "./team-logo.js";
 import { createBracketView } from "./bracket-view.js";
 import { renderStandings } from "./standings-view.js";
 
 export function createSeasonView(elements, teamsByName) {
   const renderBracket = createBracketView(elements);
-  function renderRoster(season) {
-    const team = season.teams.find((item) => item.id === season.userTeamId);
-    elements.userRoster.replaceChildren();
-    team.players.forEach((player) => {
-      elements.userRoster.append(createPlayerCard(player, "", null, teamsByName));
-    });
-    elements.userRoster.style.display = "grid";
-    elements.userRoster.style.gap = "9px";
-  }
   function renderHistory(season) {
     elements.matchHistory.hidden = season.history.length === 0;
     elements.historyRounds.replaceChildren();
@@ -100,7 +91,6 @@ export function createSeasonView(elements, teamsByName) {
   }
   function renderCurrentRound(season) {
     if (season.stage === "complete") {
-      elements.weekLabel.textContent = "Season complete";
       elements.weekDescription.textContent = "";
       elements.weekDescription.hidden = true;
       elements.weekDescription.classList.remove("error");
@@ -114,7 +104,6 @@ export function createSeasonView(elements, teamsByName) {
       return;
     }
     const round = getCurrentRound(season);
-    elements.weekLabel.textContent = round.title;
     const userMatches = round.matches.filter((match) =>
       match.teamAId === season.userTeamId || match.teamBId === season.userTeamId
     );
@@ -137,12 +126,49 @@ export function createSeasonView(elements, teamsByName) {
   function renderSeason(season) {
     const userTeam = season.teams.find((team) => team.id === season.userTeamId);
     elements.seasonTitle.replaceChildren();
+    elements.seasonTitle.classList.add("season-title-layout");
+    const identity = document.createElement("span");
+    identity.className = "season-team-identity";
     const logo = createTeamLogo(userTeam);
-    if (logo) elements.seasonTitle.append(logo);
-    elements.seasonTitle.append(document.createTextNode(`${userTeam.name} · ${userTeam.region}`));
-    elements.stageName.textContent = getStageLabel(season);
+    if (logo) identity.append(logo);
+    const teamName = document.createElement("span");
+    teamName.className = "season-team-name";
+    teamName.textContent = userTeam.name;
+    const region = document.createElement("span");
+    region.className = "season-team-region";
+    region.textContent = userTeam.region;
+    identity.append(teamName, region);
+
+    const playerStrip = document.createElement("span");
+    playerStrip.className = "season-player-strip";
+    userTeam.players.forEach((player) => {
+      const tier = getPlayerTier(Math.round(player.rating));
+      const card = document.createElement("span");
+      card.className = `season-player-card ${tier.className}`;
+      const rating = document.createElement("strong");
+      rating.className = "season-player-rating";
+      rating.textContent = Math.round(player.rating);
+      const playerTeam = teamsByName.get(player.startingTeam);
+      const playerTeamLogo = createTeamLogo(playerTeam, "season-player-team-logo");
+      const details = document.createElement("span");
+      details.className = "season-player-details";
+      const name = document.createElement("span");
+      name.className = "season-player-name";
+      name.textContent = player.name;
+      const team = document.createElement("span");
+      team.className = "season-player-team";
+      team.textContent = playerTeam?.name ?? player.startingTeam ?? "RHL";
+      details.append(name, team);
+      const tierLabel = document.createElement("span");
+      tierLabel.className = "season-player-tier";
+      tierLabel.textContent = tier.name;
+      card.append(rating);
+      if (playerTeamLogo) card.append(playerTeamLogo);
+      card.append(details, tierLabel);
+      playerStrip.append(card);
+    });
+    elements.seasonTitle.append(identity, playerStrip);
     renderStandings(season, elements.standings);
-    renderRoster(season);
     renderHistory(season);
     renderChampion(season);
     renderBracket(season);

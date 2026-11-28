@@ -10,7 +10,10 @@
 <body>
   <main class="shell">
     <header class="brand-header">
-      <img class="brand-logo" src="./graphics/rhl_logo/s10.png" alt="Rocket Hockey League Season 10 logo">
+      <!-- TEMP TEST SHORTCUT: remove this button and its handler in app.js after testing. -->
+      <button id="temporary-test-shortcut" class="brand-logo-button" type="button" aria-label="Temporary test: start a season with DRKY, Pacify, and Pegs">
+        <img class="brand-logo" src="./graphics/rhl_logo/s10.png" alt="Rocket Hockey League Season 10 logo">
+      </button>
       <h1 class="brand-title">Rocket Hockey League - Draft RHL S10 Simulation</h1>
     </header>
 
@@ -49,20 +52,13 @@
     <section id="season-screen" hidden aria-live="polite">
       <div class="season-heading">
         <div>
-          <div id="stage-name" class="topline">Season 10 · League play</div>
           <h2 id="season-title">Your season</h2>
         </div>
-        <button id="new-season-button" class="secondary" type="button">New season</button>
+        <button id="advance-button" type="button">Simulate week</button>
       </div>
       <div id="champion-banner" class="champion" hidden></div>
-      <div class="panel week-panel">
-        <div class="week-heading">
-          <div>
-            <div id="week-label" class="week-pill">League Play · Week 1 of 7</div>
-            <p id="week-description" class="week-description" hidden></p>
-          </div>
-          <button id="advance-button" type="button">Simulate week 1</button>
-        </div>
+      <div class="week-panel">
+        <p id="week-description" class="week-description" hidden></p>
         <div id="week-matches" class="match-list"></div>
         <section id="bracket-panel" class="panel bracket-panel" aria-labelledby="bracket-title" hidden>
           <h2 id="bracket-title">Tournament bracket</h2>
@@ -76,10 +72,6 @@
             <h2 id="standings-title">League Play standings</h2>
           </div>
           <div id="standings"></div>
-        </section>
-        <section class="panel" aria-labelledby="roster-title">
-          <h2 id="roster-title">Your team</h2>
-          <div id="user-roster"></div>
         </section>
       </div>
       <section id="match-history" class="panel history" hidden>
