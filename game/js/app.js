@@ -32,7 +32,6 @@ const weekMatches = document.querySelector("#week-matches");
 const standingsContainer = document.querySelector("#standings");
 const championBanner = document.querySelector("#champion-banner");
 const bracketPanel = document.querySelector("#bracket-panel");
-const bracketNote = document.querySelector("#bracket-note");
 const bracketContent = document.querySelector("#bracket-content");
 
 let players = [];
@@ -46,7 +45,7 @@ let defaultTeamsByName = new Map();
 const seasonView = createSeasonView({
   seasonTitle, weekDescription, weekMatches, standings: standingsContainer,
   championBanner, advanceButton,
-  bracketPanel, bracketNote, bracketContent
+  bracketPanel, bracketContent
 }, defaultTeamsByName);
 
 function setStatus(message, isError = false) {

@@ -6,6 +6,11 @@
   <meta name="theme-color" content="#111827">
   <title>RHL Career</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./draft.css">
+  <link rel="stylesheet" href="./season.css">
+  <link rel="stylesheet" href="./match.css">
+  <link rel="stylesheet" href="./bracket.css">
+  <link rel="stylesheet" href="./standings.css">
 </head>
 <body>
   <main class="shell">
@@ -61,9 +66,7 @@
       <div class="week-panel">
         <p id="week-description" class="week-description" hidden></p>
         <div id="week-matches" class="match-list"></div>
-        <section id="bracket-panel" class="panel bracket-panel" aria-labelledby="bracket-title" hidden>
-          <h2 id="bracket-title">Tournament bracket</h2>
-          <p id="bracket-note" class="bracket-note"></p>
+        <section id="bracket-panel" class="panel bracket-panel" aria-label="Tournament brackets" hidden>
           <div id="bracket-content"></div>
         </section>
       </div>

@@ -168,7 +168,7 @@ export function createBracketView(elements) {
     const outcome = (key, result, fallback) =>
       getBracketOutcome(stage, key, result, region, null, fallback);
     return createBracketSection(
-      `${region} Regional Playoffs`,
+      `${region} Regional Playoffs · Double elimination`,
       [
         createBracketColumn("Semifinals", [
           createBracketMatchCard({
@@ -389,16 +389,12 @@ export function createBracketView(elements) {
     elements.bracketPanel.hidden = true;
     if (season.stage === "regional_playoffs") {
       sections = ["NA", "EU"].map(regionalPlayoffBracket);
-      elements.bracketNote.textContent = "Double elimination · Series scores and advancing teams update as each round is played.";
     } else if (season.stage === "regional_lcq") {
       sections = ["NA", "EU"].map(regionalLcqBracket);
-      elements.bracketNote.textContent = "Four-team double elimination · The upper-final winner and lower-final winner qualify.";
     } else if (season.stage === "international_groups") {
       sections = ["A", "B"].map(internationalGroupBracket);
-      elements.bracketNote.textContent = "Each group has two teams from NA and two from EU; the top three advance.";
     } else if (season.stage === "international_championship" || season.stage === "complete") {
       sections = [internationalChampionshipBracket()];
-      elements.bracketNote.textContent = "Six-team double elimination · Best-of-7 · The grand final has no bracket reset.";
     }
     sections = sections.filter(Boolean);
     if (sections.length === 0) {

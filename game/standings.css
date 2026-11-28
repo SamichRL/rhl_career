@@ -1,0 +1,29 @@
+    #season-screen > .columns { display: block; }
+    #season-screen > .columns > .panel { border: 1px solid #43877f; border-radius: 14px; padding: 12px 14px; background: var(--panel); box-shadow: none; }
+    #standings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .standings-table { table-layout: fixed; }
+    .standings-team-column { width: 64%; }
+    .standings-stat-column { width: 12%; }
+    th, td { padding: 6px 7px; border-bottom: 0; text-align: right; }
+    th { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+    #standings td:not(:first-child) { font-weight: 800; font-variant-numeric: tabular-nums; }
+    th:first-child, td:first-child { text-align: left; }
+    tr.user-row { background: linear-gradient(90deg, transparent, #285b535c 12%, #24504768 40%, #203d3d55 78%, transparent); }
+    tr.user-row td:first-child { color: var(--accent); font-weight: 750; }
+    .standing-team { display: flex; align-items: center; gap: 6px; }
+    .rank { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 800; width: 16px; }
+    .standing-logo { width: 16px; height: 16px; }
+    .region { margin: 0 0 9px; color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+    .standings-group { padding: 0; background: transparent; }
+    .standings-group + .standings-group { margin-top: 0; }
+    details { border-top: 1px solid var(--line); padding: 12px 0; }
+    summary { cursor: pointer; font-size: 13px; font-weight: 700; }
+    details .match-list { margin-top: 11px; }
+
+@media (max-width: 720px) {
+      #standings { grid-template-columns: 1fr; }
+      .standings-group:not(.user-region) { display: none; }
+      th, td { padding: 8px 4px; }
+}

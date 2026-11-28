@@ -1,0 +1,84 @@
+    #season-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    #season-title.season-title-layout { width: 100%; flex-wrap: wrap; gap: 12px 20px; }
+    .season-team-identity { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; }
+    .season-team-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .season-team-region { color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .season-player-strip { display: grid; flex: 1 1 600px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .season-player-card {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--tier-color, #aeb7c2);
+      border-radius: 9px;
+      padding: 7px 9px;
+      background: linear-gradient(145deg, #172b42, #091321);
+      box-shadow: var(--tier-glow, 0 0 4px #aeb7c222);
+      font-size: 11px;
+    }
+    .season-player-card.basic { --tier-color: #aeb7c2; --tier-glow: 0 0 4px #aeb7c222; }
+    .season-player-card.uncommon { --tier-color: #39d66f; --tier-glow: 0 0 8px #39d66f44; }
+    .season-player-card.rare { --tier-color: #4b9cff; --tier-glow: 0 0 8px #4b9cff44; }
+    .season-player-card.elite { --tier-color: #bd72ff; --tier-glow: 0 0 8px #bd72ff44; }
+    .season-player-card.legendary { --tier-color: #f4c84c; --tier-glow: 0 0 8px #f4c84c44; }
+    .season-player-card.iconic { --tier-color: #ff303f; --tier-glow: 0 0 8px #ff303f44; }
+    .season-player-rating { color: var(--tier-color); font-size: 19px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    .season-player-team-logo { flex: 0 0 22px; width: 22px; height: 22px; object-fit: contain; }
+    .season-player-details { display: grid; min-width: 0; gap: 2px; }
+    .season-player-name, .season-player-team { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .season-player-name { font-size: 11px; font-weight: 850; }
+    .season-player-team { color: var(--muted); font-size: 9px; font-weight: 600; }
+    .season-player-tier { margin-left: auto; color: var(--tier-color); font-size: 8px; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+    .season-heading { align-items: stretch; }
+    .season-heading > div:first-child { display: flex; min-width: 0; flex: 1; align-items: stretch; }
+    .season-heading > button { align-self: stretch; }
+
+    .week-panel { margin: 18px 0; }
+    .week-description { margin: 9px 0 0; }
+
+    .week-heading { margin: 6px 0 12px; }
+    .week-pill {
+      flex: none;
+      border: 1px solid #337c77;
+      border-radius: 999px;
+      padding: 6px 11px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    #season-title .team-logo { width: 38px; height: 38px; }
+
+    .champion {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 16px;
+      border: 1px solid #816726;
+      border-radius: 10px;
+      padding: 14px;
+      background: #342d1e;
+      color: var(--gold);
+      font-weight: 800;
+    }
+
+@media (max-width: 720px) {
+      .season-heading, .section-heading { align-items: flex-start; }
+      .season-heading { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .season-heading > div:first-child { display: block; }
+      #season-title.season-title-layout { flex-wrap: nowrap; align-items: center; gap: 8px; }
+      .season-team-identity { flex: 0 0 auto; }
+      .season-team-name, .season-team-region { display: none; }
+      #season-title .team-logo { width: 34px; height: 34px; }
+      .season-player-strip { flex: 1 1 0; min-width: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+      .season-player-card { gap: 5px; padding: 6px; }
+      .season-player-team-logo, .season-player-tier { display: none; }
+      .season-player-rating { font-size: 16px; }
+      .season-player-details { flex: 1; }
+      .season-heading > button { width: 100%; }
+}
