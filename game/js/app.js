@@ -38,8 +38,6 @@ const championBanner = document.querySelector("#champion-banner");
 const bracketPanel = document.querySelector("#bracket-panel");
 const bracketNote = document.querySelector("#bracket-note");
 const bracketContent = document.querySelector("#bracket-content");
-const matchHistory = document.querySelector("#match-history");
-const historyRounds = document.querySelector("#history-rounds");
 // TEMP TEST SHORTCUT: remove this binding and startPresetTestSeason() after testing.
 const temporaryTestShortcut = document.querySelector("#temporary-test-shortcut");
 
@@ -82,7 +80,7 @@ function syncDraftLayout() {
 stackedDraftLayout.addEventListener("change", syncDraftLayout);
 const seasonView = createSeasonView({
   seasonTitle, weekDescription, weekMatches, standings: standingsContainer,
-  championBanner, matchHistory, historyRounds, advanceButton,
+  championBanner, advanceButton,
   bracketPanel, bracketNote, bracketContent
 }, defaultTeamsByName);
 
@@ -262,12 +260,15 @@ function advanceSeason() {
       continueSeason(season);
       const nextMatch = advanceToNextUserMatch(season);
       if (!nextMatch.round || season.stage === "complete") {
-        seasonView(season);
+        seasonView(season, { updateStandings: false });
         return;
       }
     }
     simulateCurrentStep(season);
-    seasonView(season);
+    seasonView(season, {
+      updateStandings: false,
+      updateStandingsAfterAnimation: true
+    });
   } catch (error) {
     console.error(error);
     weekDescription.textContent = error.message;

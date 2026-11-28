@@ -7,21 +7,6 @@ import { renderStandings } from "./standings-view.js";
 
 export function createSeasonView(elements, teamsByName) {
   const renderBracket = createBracketView(elements);
-  function renderHistory(season) {
-    elements.matchHistory.hidden = season.history.length === 0;
-    elements.historyRounds.replaceChildren();
-    season.history.forEach((round) => {
-      const details = document.createElement("details");
-      const summary = document.createElement("summary");
-      summary.textContent = `${round.title} · ${round.matches.length} series`;
-      details.append(summary);
-      const matches = document.createElement("div");
-      matches.className = "match-list";
-      round.matches.forEach((match) => matches.append(createMatchCard(match, season)));
-      details.append(matches);
-      elements.historyRounds.append(details);
-    });
-  }
   function renderChampion(season) {
     const champion = getChampion(season);
     elements.championBanner.hidden = !champion;
@@ -89,7 +74,7 @@ export function createSeasonView(elements, teamsByName) {
     }
     return "Simulate next round";
   }
-  function renderCurrentRound(season) {
+  function renderCurrentRound(season, { updateStandingsAfterAnimation = false } = {}) {
     if (season.stage === "complete") {
       elements.weekDescription.textContent = "";
       elements.weekDescription.hidden = true;
@@ -119,11 +104,14 @@ export function createSeasonView(elements, teamsByName) {
     elements.weekMatches.replaceChildren(...userMatches.map((match) => createMatchCard(match, season, {
       animate: round.resultsReady,
       onAnimationComplete: () => {
+        if (updateStandingsAfterAnimation) {
+          window.setTimeout(() => renderStandings(season, elements.standings), 500);
+        }
         elements.advanceButton.disabled = false;
       }
     })));
   }
-  function renderSeason(season) {
+  function renderSeason(season, { updateStandings = true, updateStandingsAfterAnimation = false } = {}) {
     const userTeam = season.teams.find((team) => team.id === season.userTeamId);
     elements.seasonTitle.replaceChildren();
     elements.seasonTitle.classList.add("season-title-layout");
@@ -168,11 +156,10 @@ export function createSeasonView(elements, teamsByName) {
       playerStrip.append(card);
     });
     elements.seasonTitle.append(identity, playerStrip);
-    renderStandings(season, elements.standings);
-    renderHistory(season);
+    if (updateStandings) renderStandings(season, elements.standings);
     renderChampion(season);
     renderBracket(season);
-    renderCurrentRound(season);
+    renderCurrentRound(season, { updateStandingsAfterAnimation });
   }
   return renderSeason;
 }
