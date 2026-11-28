@@ -1,4 +1,6 @@
 import { createTeamLogo } from "./team-logo.js";
+import { createMatchCard } from "./match-view.js";
+import { createMatch } from "../season-model.js";
 
 export function createBracketView(elements) {
   let season;
@@ -39,50 +41,32 @@ export function createBracketView(elements) {
     const resolvedTeamBId = match?.teamBId ?? teamBId;
     const resolvedTeamA = getTeamName(resolvedTeamAId, teamAName);
     const resolvedTeamB = getTeamName(resolvedTeamBId, teamBName);
-    const teamAIsUser = season.teams.find((team) => team.id === resolvedTeamAId)?.isUserTeam;
-    const teamBIsUser = season.teams.find((team) => team.id === resolvedTeamBId)?.isUserTeam;
-    const userOnRight = teamBIsUser && !teamAIsUser;
-    const displayTeamAId = userOnRight ? resolvedTeamBId : resolvedTeamAId;
-    const displayTeamBId = userOnRight ? resolvedTeamAId : resolvedTeamBId;
-    const displayTeamA = userOnRight ? resolvedTeamB : resolvedTeamA;
-    const displayTeamB = userOnRight ? resolvedTeamA : resolvedTeamB;
-    const card = document.createElement("article");
-    card.className = "bracket-match";
-    if (match && season.activeRound?.matches.includes(match)) card.classList.add("current");
-    if (
-      season.teams.find((team) => team.id === resolvedTeamAId)?.isUserTeam ||
-      season.teams.find((team) => team.id === resolvedTeamBId)?.isUserTeam
-    ) {
-      card.classList.add("user-match");
-    }
-    const heading = document.createElement("div");
-    heading.className = "bracket-match-label";
-    heading.textContent = label;
-    card.append(heading);
-    const result = match?.result;
-    [
-      { team: displayTeamA, teamId: displayTeamAId, score: userOnRight ? result?.teamBWins : result?.teamAWins, winner: result?.winnerId === displayTeamAId },
-      { team: displayTeamB, teamId: displayTeamBId, score: userOnRight ? result?.teamAWins : result?.teamBWins, winner: result?.winnerId === displayTeamBId }
-    ].forEach(({ team, teamId, score, winner }) => {
-      const row = document.createElement("div");
-      row.className = "bracket-team";
-      if (winner) row.classList.add("winner");
-      const teamName = document.createElement("span");
-      teamName.className = "bracket-team-name";
-      const teamDetails = season.teams.find((item) => item.id === teamId);
-      if (teamDetails) teamName.append(createTeamLogo(teamDetails, "team-logo team-logo-small"));
-      const name = document.createElement("span");
-      name.textContent = team;
-      if (team === "TBD" || team.startsWith("Winner of") || team.startsWith("Loser of")) {
-        name.classList.add("bracket-waiting");
-      }
-      teamName.append(name);
-      const scoreNode = document.createElement("span");
-      scoreNode.textContent = score === undefined ? "" : score;
-      row.append(teamName, scoreNode);
-      card.append(row);
+    const bestOf = stage === "international_championship" ||
+      (stage === "regional_playoffs" && key === "regional_grand_final")
+      ? 7
+      : 5;
+    const cardMatch = match ?? createMatch({
+      id: key,
+      key,
+      label,
+      region,
+      group,
+      teamAId: resolvedTeamAId,
+      teamBId: resolvedTeamBId,
+      bestOf,
+      advantageA: stage === "regional_playoffs" && key === "regional_grand_final" ? 1 : 0
     });
-    return card;
+    const animate = Boolean(
+      match &&
+      season.activeRound?.resultsReady &&
+      season.activeRound.matches.includes(match)
+    );
+    return createMatchCard(cardMatch, season, {
+      animate,
+      fallbackTeamAName: resolvedTeamA,
+      fallbackTeamBName: resolvedTeamB,
+      fallbackRegion: region ?? ""
+    });
   }
   function createBracketColumn(title, cards) {
     const column = document.createElement("div");
@@ -418,12 +402,10 @@ export function createBracketView(elements) {
     }
     sections = sections.filter(Boolean);
     if (sections.length === 0) {
-      elements.weekMatches.classList.remove("bracket-current-match");
       return;
     }
     elements.bracketContent.replaceChildren(...sections);
     elements.bracketPanel.hidden = false;
-    elements.weekMatches.classList.add("bracket-current-match");
   }
   return renderBracket;
 }

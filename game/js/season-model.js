@@ -64,6 +64,34 @@ export function createBracket({ id, type, matches = [], status = "scheduled" }) 
   };
 }
 
+export function createMatch({
+  id,
+  key = id,
+  label = "Season match",
+  region = null,
+  group = null,
+  teamAId,
+  teamBId,
+  bestOf = 5,
+  advantageA = 0,
+  advantageB = 0,
+  result = null
+}) {
+  return {
+    id,
+    key,
+    label,
+    region,
+    group,
+    teamAId,
+    teamBId,
+    bestOf,
+    advantageA,
+    advantageB,
+    result
+  };
+}
+
 export function createSeason({ id, seed = Date.now(), name = "RHL Season 10" }) {
   return {
     id,

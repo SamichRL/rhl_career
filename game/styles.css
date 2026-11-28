@@ -60,9 +60,10 @@
     }
     .brand-header { display: flex; align-items: flex-start; gap: 16px; margin: 0 0 24px; }
     .brand-logo { width: 92px; height: 92px; flex: 0 0 auto; object-fit: contain; }
-    /* TEMP TEST SHORTCUT: styling for the clickable RHL logo; remove with shortcut. */
-    .brand-logo-button { display: block; flex: 0 0 auto; padding: 0; border: 0; background: transparent; cursor: pointer; }
-    .brand-logo-button .brand-logo { display: block; }
+    /* TEMP TEST SHORTCUTS: remove with their title buttons and handlers. */
+    .temporary-title-shortcut { padding: 0; background: transparent; color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; line-height: inherit; vertical-align: baseline; }
+    .temporary-title-shortcut:hover:not(:disabled) { background: transparent; color: inherit; }
+    .temporary-title-shortcut:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     .brand-title { margin: 0; font-size: clamp(25px, 4vw, 42px); letter-spacing: -.035em; line-height: 1.08; }
     h2 { margin: 0 0 8px; font-size: 21px; }
     #season-title {
@@ -119,24 +120,13 @@
     .player-grid-row { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(min(100%, clamp(150px, 14vw, 220px)), 1fr)); gap: 14px; }
     .columns { grid-template-columns: minmax(0, 1.35fr) minmax(280px, .85fr); align-items: start; }
     #season-screen > .columns { display: block; }
-    #season-screen > .columns > .panel { position: relative; isolation: isolate; border: 0; padding: 12px 14px; background: transparent; box-shadow: none; }
-    #season-screen > .columns > .panel::before, .match-card::before {
-      position: absolute;
-      z-index: -1;
-      inset: 0;
-      background: var(--surface-color);
-      content: "";
-      pointer-events: none;
-      mask-image: linear-gradient(to right, transparent, #000 12px, #000 calc(100% - 12px), transparent), linear-gradient(to bottom, transparent, #000 12px, #000 calc(100% - 12px), transparent), radial-gradient(circle at top left, transparent 0, #000 22px), radial-gradient(circle at top right, transparent 0, #000 22px), radial-gradient(circle at bottom left, transparent 0, #000 22px), radial-gradient(circle at bottom right, transparent 0, #000 22px);
-      mask-composite: intersect;
-    }
-    #season-screen > .columns > .panel { --surface-color: var(--panel); }
+    #season-screen > .columns > .panel { border: 1px solid #43877f; border-radius: 14px; padding: 12px 14px; background: var(--panel); box-shadow: none; }
     #standings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     .match-card {
-      position: relative;
-      isolation: isolate;
-      --surface-color: var(--panel);
-      padding: 8px 4px;
+      border: 1px solid #43877f;
+      border-radius: 10px;
+      padding: 10px;
+      background: var(--panel);
     }
     .player-card {
       position: relative;
@@ -264,13 +254,6 @@
       text-transform: uppercase;
     }
     .match-list { display: grid; gap: 4px; }
-    #week-matches.bracket-current-match {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      padding: 8px 0;
-      background: var(--panel);
-    }
     .match-card { display: grid; gap: 8px; }
     .match-label { grid-column: 1 / -1; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
     .match-scoreboard {
@@ -339,7 +322,7 @@
     .bracket-lane-title { color: var(--accent); font-size: 10px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
     .lower-bracket-lane .bracket-lane-title { color: #c6a9ec; }
     .bracket-board { display: flex; align-items: stretch; gap: 24px; }
-    .bracket-column { position: relative; display: grid; align-content: center; gap: 12px; flex: 0 0 190px; }
+    .bracket-column { position: relative; display: grid; align-content: center; gap: 12px; flex: 0 0 340px; }
     .bracket-column + .bracket-column::before { position: absolute; top: 50%; left: -19px; color: var(--accent); content: "â†’"; font-size: 19px; font-weight: 800; transform: translateY(-50%); }
     .bracket-column h4 { margin: 0; color: var(--muted); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; }
     .bracket-feeds { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 9px; }
@@ -383,6 +366,7 @@
     .rank { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 800; width: 16px; }
     .standing-logo { width: 16px; height: 16px; }
     .region { margin: 0 0 9px; color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+    .standings-group { padding: 0; background: transparent; }
     .standings-group + .standings-group { margin-top: 0; }
     details { border-top: 1px solid var(--line); padding: 12px 0; }
     summary { cursor: pointer; font-size: 13px; font-weight: 700; }

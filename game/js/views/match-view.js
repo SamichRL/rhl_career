@@ -26,7 +26,8 @@ function animateGoals(toA, toB, update) {
 function makeTeamIdentity(team) {
   const identity = document.createElement("div");
   identity.className = "match-team-identity";
-  identity.append(createTeamLogo(team));
+  const logo = createTeamLogo(team);
+  if (logo) identity.append(logo);
   const details = document.createElement("span");
   details.className = "match-team-details";
   const name = document.createElement("strong");
@@ -53,11 +54,11 @@ function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, sta
       const scoreB = userOnRight ? game.scoreA : game.scoreB;
       const cellA = cellsA[index + gameColumnOffset];
       const cellB = cellsB[index + gameColumnOffset];
+      if (!reduceMotion) await wait(300);
       cellA.textContent = "0";
       cellB.textContent = "0";
       cellA.classList.add("is-visible");
       cellB.classList.add("is-visible");
-      if (!reduceMotion) await wait(250);
       if (reduceMotion) {
         cellA.textContent = scoreA;
         cellB.textContent = scoreB;
@@ -87,9 +88,27 @@ function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, sta
   })();
 }
 
-export function createMatchCard(match, season, { animate = false, onAnimationComplete = () => {} } = {}) {
-  const teamA = season.teams.find((team) => team.id === match.teamAId);
-  const teamB = season.teams.find((team) => team.id === match.teamBId);
+export function createMatchCard(match, season, {
+  animate = false,
+  onAnimationComplete = () => {},
+  fallbackTeamAName = "TBD",
+  fallbackTeamBName = "TBD",
+  fallbackRegion = ""
+} = {}) {
+  const teamA = season.teams.find((team) => team.id === match.teamAId) ?? {
+    id: match.teamAId,
+    name: fallbackTeamAName,
+    region: fallbackRegion,
+    isUserTeam: false,
+    logo: null
+  };
+  const teamB = season.teams.find((team) => team.id === match.teamBId) ?? {
+    id: match.teamBId,
+    name: fallbackTeamBName,
+    region: fallbackRegion,
+    isUserTeam: false,
+    logo: null
+  };
   const userOnRight = teamB.isUserTeam && !teamA.isUserTeam;
   const leftTeam = userOnRight ? teamB : teamA;
   const rightTeam = userOnRight ? teamA : teamB;
