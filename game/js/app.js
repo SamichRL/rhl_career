@@ -54,6 +54,13 @@ let draftChoicesVisible = false;
 let defaultTeamsByName = new Map();
 
 function syncDraftLayout() {
+  if (stackedDraftLayout.matches && draft.length === 3) {
+    teamReelElement.hidden = true;
+    draftPlayers.hidden = false;
+    draftLayout.after(draftPlayers);
+    return;
+  }
+
   if (!stackedDraftLayout.matches) {
     if (currentDraftTeam) draftChoicesVisible = true;
     teamReelElement.hidden = false;
