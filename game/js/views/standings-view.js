@@ -1,15 +1,17 @@
 import { getStandings } from "../season-engine.js";
 import { createTeamLogo } from "./team-logo.js";
 
-function renderStandingsGroup(region, season) {
+function renderStandingsGroup(region, season, userRegion) {
   const group = document.createElement("section");
   group.className = "standings-group";
+  if (region === userRegion) group.classList.add("user-region");
   const heading = document.createElement("h3");
   heading.className = "region";
-  heading.textContent = region;
+  heading.textContent = `${region} League Play Standings`;
   group.append(heading);
   const table = document.createElement("table");
-  table.innerHTML = "<thead><tr><th>Team</th><th>W</th><th>L</th><th>GD</th></tr></thead>";
+  table.className = "standings-table";
+  table.innerHTML = "<colgroup><col class=\"standings-team-column\"><col span=\"3\" class=\"standings-stat-column\"></colgroup><thead><tr><th>Team</th><th>W</th><th>L</th><th>GD</th></tr></thead>";
   const body = document.createElement("tbody");
   getStandings(season, region).forEach((team, index) => {
     const row = document.createElement("tr");
@@ -17,8 +19,11 @@ function renderStandingsGroup(region, season) {
     const teamCell = document.createElement("td");
     const teamLabel = document.createElement("span");
     teamLabel.className = "standing-team";
-    teamLabel.append(document.createTextNode(`${index + 1}. `));
-    const logo = createTeamLogo(team);
+    const rank = document.createElement("span");
+    rank.className = "rank";
+    rank.textContent = index + 1;
+    teamLabel.append(rank);
+    const logo = createTeamLogo(team, "team-logo team-logo-small standing-logo");
     if (logo) teamLabel.append(logo);
     teamLabel.append(document.createTextNode(
       `${team.name}${team.isUserTeam ? " (You)" : ""}`
@@ -39,8 +44,10 @@ function renderStandingsGroup(region, season) {
 }
 
 export function renderStandings(season, standingsContainer) {
+  const userTeam = season.teams.find((team) => team.id === season.userTeamId);
+  const userRegion = userTeam.region;
   standingsContainer.replaceChildren(
-    renderStandingsGroup("NA", season),
-    renderStandingsGroup("EU", season)
+    renderStandingsGroup("NA", season, userRegion),
+    renderStandingsGroup("EU", season, userRegion)
   );
 }
