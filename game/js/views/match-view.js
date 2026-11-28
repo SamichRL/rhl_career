@@ -38,7 +38,7 @@ function makeTeamIdentity(team) {
   return identity;
 }
 
-function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, startWinsB, userOnRight, userIsA, onComplete) {
+function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, startWinsB, userOnRight, userIsA, onComplete, gameColumnOffset) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let winsA = startWinsA;
   let winsB = startWinsB;
@@ -51,8 +51,8 @@ function renderAnimatedScores(cellsA, cellsB, resultNode, games, startWinsA, sta
       const game = games[index];
       const scoreA = userOnRight ? game.scoreB : game.scoreA;
       const scoreB = userOnRight ? game.scoreA : game.scoreB;
-      const cellA = cellsA[index];
-      const cellB = cellsB[index];
+      const cellA = cellsA[index + gameColumnOffset];
+      const cellB = cellsB[index + gameColumnOffset];
       cellA.textContent = "0";
       cellB.textContent = "0";
       cellA.classList.add("is-visible");
@@ -143,6 +143,36 @@ export function createMatchCard(match, season, { animate = false, onAnimationCom
     cellsA.push(cellA);
     cellsB.push(cellB);
   }
+  const advantageA = userOnRight ? match.advantageB ?? 0 : match.advantageA ?? 0;
+  const advantageB = userOnRight ? match.advantageA ?? 0 : match.advantageB ?? 0;
+  const hasStartingAdvantage = advantageA > 0 || advantageB > 0;
+  const gameColumnOffset = hasStartingAdvantage ? 1 : 0;
+  const userIsA = teamA.isUserTeam || teamB.isUserTeam ? userOnRight || teamA.isUserTeam : null;
+  if (hasStartingAdvantage) {
+    const advantageWinnerA = advantageA > advantageB;
+    const advantageCellA = cellsA[0];
+    const advantageCellB = cellsB[0];
+    advantageCellA.textContent = advantageWinnerA ? "W" : "L";
+    advantageCellB.textContent = advantageWinnerA ? "L" : "W";
+    advantageCellA.classList.add("is-visible");
+    advantageCellB.classList.add("is-visible");
+    if (userIsA !== null) {
+      const userCell = userIsA ? advantageCellA : advantageCellB;
+      userCell.classList.add("is-user-score");
+      userCell.classList.toggle("is-user-win", userIsA ? advantageWinnerA : !advantageWinnerA);
+      userCell.classList.toggle("is-user-loss", userIsA ? !advantageWinnerA : advantageWinnerA);
+    } else {
+      const winnerCell = advantageWinnerA ? advantageCellA : advantageCellB;
+      winnerCell.classList.add("is-winner");
+    }
+    const advantageDescription = advantageWinnerA
+      ? "Starting series advantage: win"
+      : "Starting series advantage: loss";
+    advantageCellA.setAttribute("aria-label", advantageDescription);
+    advantageCellB.setAttribute("aria-label", advantageWinnerA
+      ? "Starting series advantage: loss"
+      : "Starting series advantage: win");
+  }
   const leftWins = userOnRight ? result?.teamBWins : result?.teamAWins;
   const rightWins = userOnRight ? result?.teamAWins : result?.teamBWins;
   const seriesScore = document.createElement("span");
@@ -162,9 +192,8 @@ export function createMatchCard(match, season, { animate = false, onAnimationCom
     const scoreA = userOnRight ? game.scoreB : game.scoreA;
     const scoreB = userOnRight ? game.scoreA : game.scoreB;
     const aWon = scoreA > scoreB;
-    const cellA = cellsA[index];
-    const cellB = cellsB[index];
-    const userIsA = userOnRight || teamA.isUserTeam;
+    const cellA = cellsA[index + gameColumnOffset];
+    const cellB = cellsB[index + gameColumnOffset];
     const isUserMatch = teamA.isUserTeam || teamB.isUserTeam;
     if (isUserMatch && !animate) {
       const userCell = userIsA ? cellA : cellB;
@@ -184,30 +213,17 @@ export function createMatchCard(match, season, { animate = false, onAnimationCom
       }
     }
     if (game.overtime) {
-      cellA.title = `Game ${index + 1}, overtime`;
-      cellB.title = `Game ${index + 1}, overtime`;
+      cellA.title = `Game ${index + gameColumnOffset + 1}, overtime`;
+      cellB.title = `Game ${index + gameColumnOffset + 1}, overtime`;
     }
-    const accessibleScore = `Game ${index + 1}: ${scoreA} to ${scoreB}${game.overtime ? ", overtime" : ""}`;
+    const accessibleScore = `Game ${index + gameColumnOffset + 1}: ${scoreA} to ${scoreB}${game.overtime ? ", overtime" : ""}`;
     cellA.setAttribute("aria-label", accessibleScore);
     cellB.setAttribute("aria-hidden", "true");
   });
 
   if (animate && result) {
-    const advantageA = userOnRight ? match.advantageB ?? 0 : match.advantageA ?? 0;
-    const advantageB = userOnRight ? match.advantageA ?? 0 : match.advantageB ?? 0;
     seriesScore.classList.remove("is-win", "is-loss");
-    const userIsA = teamA.isUserTeam || teamB.isUserTeam ? userOnRight || teamA.isUserTeam : null;
-    renderAnimatedScores(cellsA, cellsB, seriesScore, games, advantageA, advantageB, userOnRight, userIsA, onAnimationComplete);
-  }
-
-  const advantageA = userOnRight ? match.advantageB ?? 0 : match.advantageA ?? 0;
-  const advantageB = userOnRight ? match.advantageA ?? 0 : match.advantageB ?? 0;
-  if (advantageA || advantageB) {
-    const advantage = document.createElement("small");
-    advantage.className = "match-advantage";
-    advantage.style.gridColumn = "1 / -1";
-    advantage.textContent = `Starting advantage ${advantageA}–${advantageB}`;
-    scoreboard.append(advantage);
+    renderAnimatedScores(cellsA, cellsB, seriesScore, games, advantageA, advantageB, userOnRight, userIsA, onAnimationComplete, gameColumnOffset);
   }
 
   card.append(scoreboard);
